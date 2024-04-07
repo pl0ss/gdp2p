@@ -31,19 +31,43 @@ public class AudioFile {
 		String replaceToThat;
 		
 		if(isWindows) {
-			replaceThis = "\\\\\\\\"; // also \\
-			replaceToThat = "\\\\"; // zu \
-		} else {
-			replaceThis = "//";
-			replaceToThat = "/";
+			newPathname = newPathname.replaceAll("/", "\\\\");
 		}
+
 		
+//		if(isWindows) {
+//			replaceThis = "\\\\\\\\"; // also \\
+//			replaceToThat = "\\\\"; // zu \
+//		} else {
+//			replaceThis = "//";
+//			replaceToThat = "/";
+//		}
+//		
+//		while(newPathname.split(replaceThis).length > 1) {
+//			newPathname = newPathname.replaceAll(replaceThis, replaceToThat);
+//		}
+		
+		// Alle Doppelten / oder \ entfernen
+		
+		replaceThis = "\\\\\\\\"; // also \\
+		replaceToThat = "\\\\"; // zu \
 		while(newPathname.split(replaceThis).length > 1) {
 			newPathname = newPathname.replaceAll(replaceThis, replaceToThat);
 		}
 		
-		if(isWindows) {
-			newPathname = newPathname.replaceAll("/", "\\\\");
+		replaceThis = "//";
+		replaceToThat = "/";
+		while(newPathname.split(replaceThis).length > 1) {
+			newPathname = newPathname.replaceAll(replaceThis, replaceToThat);
+		}
+		
+		
+		if(!isWindows) {
+			newPathname = newPathname.replaceAll("\\\\", "/");
+			if(newPathname.charAt(1) == ':') {
+				newPathname = newPathname.replaceAll(":", "");
+				newPathname = '/' + newPathname;
+			}
 		}
 		
 		return newPathname;
@@ -90,7 +114,7 @@ public class AudioFile {
 				// müsste immer gehen
 		}
 		
-		if(new String(letzteZeichen).equals(splitBy)) {
+		if(new String(letzteZeichen).equals("\\\\") || new String(letzteZeichen).equals("/")) {
 			filename = "";
 		} else {
 			String thisPath = path;
