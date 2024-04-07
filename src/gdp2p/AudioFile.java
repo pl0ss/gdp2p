@@ -79,6 +79,8 @@ public class AudioFile {
 	}
 	static void parseSetFilename(String path) {
 		filename = parseReturnFilename(path, isWindows());
+		author = parseReturnAuthor(filename);
+		title = parseReturnTitle(filename);
 	}
 	static String parseReturnFilename(String path, boolean isWindows) {
 		
@@ -127,6 +129,33 @@ public class AudioFile {
 		}
 		
 		return filename;
+	}
+	static String parseReturnAuthor(String filename) {
+		String author = filename;
+		if(author.split("-").length > 1) {
+			author = author.split(" - ")[0];
+		} else { // wenn filename kein " - " enthält
+			author = "";
+		}
+		
+		author = author.trim();
+		
+		return author;
+	}
+	static String parseReturnTitle(String filename) {
+		String title = filename;
+		if(title.split("-").length > 1) {
+			title = title.split(" - ")[1];
+		}
+		
+		int posLetzterPunkt = title.lastIndexOf(".");
+		if(posLetzterPunkt >= 0) {
+			title = title.substring(0, posLetzterPunkt);
+		}
+		
+		title = title.trim();
+		
+		return title;
 	}
 	
 	static String getPathname() {
@@ -261,9 +290,47 @@ public class AudioFile {
 		
 	}
 	
+	static void test_author_title() {
+		String test_str;
+		int test_id = 1;
+		
+		test_str = " Falco  -  Rock me    Amadeus .mp3  "; // 1-2
+		test(parseReturnAuthor(test_str), "Falco", test_id++);
+		test(parseReturnTitle(test_str), "Rock me    Amadeus", test_id++);
+		
+		test_str = "Frankie Goes To Hollywood - The Power Of Love.ogg"; // 3-4
+		test(parseReturnAuthor(test_str), "Frankie Goes To Hollywood", test_id++);
+		test(parseReturnTitle(test_str), "The Power Of Love", test_id++);
+		
+		test_str = "audiofile.aux"; // 5-6
+		test(parseReturnAuthor(test_str), "", test_id++);
+		test(parseReturnTitle(test_str), "audiofile", test_id++);
+		
+		test_str = "   A.U.T.O.R   -  T.I.T.E.L  .EXTENSION"; // 7-8
+		test(parseReturnAuthor(test_str), "A.U.T.O.R", test_id++);
+		test(parseReturnTitle(test_str), "T.I.T.E.L", test_id++);
+		
+		test_str = "Hans-Georg Sonstwas - Blue-eyed boy-friend.mp3"; // 9-10
+		test(parseReturnAuthor(test_str), "Hans-Georg Sonstwas", test_id++);
+		test(parseReturnTitle(test_str), "Blue-eyed boy-friend", test_id++);
+		
+		test_str = ".mp3"; // 11-12
+		test(parseReturnAuthor(test_str), "", test_id++);
+		test(parseReturnTitle(test_str), "", test_id++);
+		
+		test_str = "Falco - Rock me Amadeus."; // 13-14
+		test(parseReturnAuthor(test_str), "Falco", test_id++);
+		test(parseReturnTitle(test_str), "Rock me Amadeus", test_id++);
+		
+		test_str = "-"; // 15-16
+		test(parseReturnAuthor(test_str), "", test_id++);
+		test(parseReturnTitle(test_str), "-", test_id++);
+	}
+	
 	public static void main(String[] args) {
 		
 		test_parse();
+		test_author_title();
 
 	}
 }
