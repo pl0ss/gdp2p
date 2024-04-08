@@ -15,6 +15,7 @@ public class AudioFile {
 		pathname = parseReturnPathname(path, isWindows());
 	}
 	static String parseReturnPathname(String path, boolean isWindows) {
+		String newPathname = path;
 		
 		// wenn path nur aus Leerzeichen und Tabs besteht, dann return ""
 		if(new String(path.trim()).equals("")) {
@@ -26,46 +27,31 @@ public class AudioFile {
 			return "-";
 		}
 		
-		String newPathname = path;
-		String replaceThis;
-		String replaceToThat;
-		
-		if(isWindows) {
-			newPathname = newPathname.replace("/", "\\\\");
-		}
-
-		
-//		if(isWindows) {
-//			replaceThis = "\\\\\\\\"; // also \\
-//			replaceToThat = "\\\\"; // zu \
-//		} else {
-//			replaceThis = "//";
-//			replaceToThat = "/";
-//		}
-//		
-//		while(newPathname.split(replaceThis).length > 1) {
-//			newPathname = newPathname.replace(replaceThis, replaceToThat);
-//		}
 		
 		// Alle Doppelten / oder \ entfernen
-		
-		replaceThis = "\\\\\\\\"; // also \\
-		replaceToThat = "\\\\"; // zu \
-		while(newPathname.split(replaceThis).length > 1) {
-			newPathname = newPathname.replace(replaceThis, replaceToThat);
+		{
+			while(newPathname.split("\\\\\\\\").length > 1) {
+				newPathname = newPathname.replaceAll("\\\\\\\\", "\\\\"); // also \\ zu \
+			}
+			
+			while(newPathname.split("//").length > 1) {
+				newPathname = newPathname.replaceAll("//", "/");
+			}
 		}
 		
-		replaceThis = "//";
-		replaceToThat = "/";
-		while(newPathname.split(replaceThis).length > 1) {
-			newPathname = newPathname.replace(replaceThis, replaceToThat);
+		// path immer zu Linux
+		newPathname = newPathname.replaceAll("\\\\", "/");
+		
+		// path zu windows Format, falls windows
+		if(isWindows) {
+			newPathname = newPathname.replaceAll("/", "\\\\");
 		}
 		
 		
+		// drive Replace, falls Linux
 		if(!isWindows) {
-			newPathname = newPathname.replace("\\\\", "/");
 			if(newPathname.charAt(1) == ':') {
-				newPathname = newPathname.replace(":", "");
+				newPathname = newPathname.replaceAll(":", "");
 				newPathname = '/' + newPathname;
 			}
 		}
@@ -80,9 +66,10 @@ public class AudioFile {
 	static void parseSetFilename(String path) {
 		filename = parseReturnFilename(path, isWindows());
 		author = parseReturnAuthor(filename);
-		title = parseReturnTitle(filename);
+		title = parseReturnTitle(path);
 	}
 	static String parseReturnFilename(String path, boolean isWindows) {
+		path = parseReturnPathname(path, false); // LinuxFormat
 		
 		// wenn path nur aus Leerzeichen und Tabs besteht, dann return ""
 		if(new String(path.trim()).equals("")) {
@@ -94,59 +81,54 @@ public class AudioFile {
 			return "-";
 		}
 		
-		String splitBy;
-		String filename;
-
-		if(isWindows) {
-			splitBy = "\\\\"; // nur zwei machen probleme
-		} else {
-			splitBy = "/";
-		}
 		
-		// Prüfen, on letztes element ein / bzw \\ ist
-		String[] pathArr = path.split("");
-		String letzteZeichen = pathArr[pathArr.length -1];
-		
-		{ // Strings vergleichen
-			// ==
-				// geht nicht, weil Referenzen damit verglichen werden
-			// (int)letzteZeichen.toCharArray()[0] == (int)splitBy.toCharArray()[0]
-				// geht nur wenn String ein zeichen lang ist
-			// new String(letzteZeichen).equals(splitBy)
-				// müsste immer gehen
-		}
-		
-		if(new String(letzteZeichen).equals("\\\\") || new String(letzteZeichen).equals("/")) {
-			filename = "";
-		} else {
-			String thisPath = path;
-			if(isWindows) {
-				thisPath = thisPath.replace("/", "\\\\");
-			}
+		// Prüfen, on letztes element ein / bzw \\ ist: Dann return ""
+		{
+			String[] pathArr = path.split("");
+			String letzteZeichen = pathArr[pathArr.length -1];
 			
-			String[] pathElements = thisPath.split(splitBy);
-			filename = pathElements[pathElements.length -1];
+			if(new String(letzteZeichen).equals("\\\\") || new String(letzteZeichen).equals("/")) {
+				return "";
+			}
 		}
 		
+		// return letztes element zwischen Slashes
+		String[] pathElements = path.split("/");
+		filename = pathElements[pathElements.length -1];
 		return filename;
 	}
+	
 	static String parseReturnAuthor(String filename) {
 		String author = filename;
 		if(author.split(" - ").length > 1) {
 			author = author.split(" - ")[0];
 		} else { // wenn filename kein " - " enthält
-			author = "";
+			return "";
 		}
 		
 		author = author.trim();
 		
 		return author;
 	}
-	static String parseReturnTitle(String filename) {
-		String title = filename;
+	
+	static String parseReturnTitle(String path) {
+		
+		// falls " - " als path übergeben wird (JUnitTest), kann bei pathname nie entstehen
+		if(new String(path).equals("-")) {
+			return "-";
+		}
+		
+		if(new String(path).equals(" - ")) {
+			return "";
+		}
+		
+
+		String title = pathname;
+		
 		if(title.split(" - ").length > 1) {
 			title = title.split(" - ")[1];
 		}
+		
 		
 		int posLetzterPunkt = title.lastIndexOf(".");
 		if(posLetzterPunkt >= 0) {
@@ -218,6 +200,7 @@ public class AudioFile {
 		String test_str;
 		int test_id = 1;
 		
+		
 		test_str = " "; // 1-6
 		parsePathname(test_str);
 		parseFilename(test_str);
@@ -288,49 +271,135 @@ public class AudioFile {
 		test(parseReturnFilename(test_str, false), "-", test_id++);
 		test(parseReturnFilename(test_str, true), "-", test_id++);
 		
+		
+		
+		test_str = "home\\meier\\Musik\\Falco - Rock Me Amadeus.mp3"; // 43 - 48
+		parsePathname(test_str);
+		parseFilename(test_str);
+		test(getPathname(), "home/meier/Musik/Falco - Rock Me Amadeus.mp3", test_id++);
+		test(getFilename(), "Falco - Rock Me Amadeus.mp3", test_id++);
+		test(parseReturnPathname(test_str, false), "home/meier/Musik/Falco - Rock Me Amadeus.mp3", test_id++);
+		test(parseReturnPathname(test_str, true), "home\\meier\\Musik\\Falco - Rock Me Amadeus.mp3", test_id++);
+		test(parseReturnFilename(test_str, false), "Falco - Rock Me Amadeus.mp3", test_id++);
+		test(parseReturnFilename(test_str, true), "Falco - Rock Me Amadeus.mp3", test_id++);
+		
 	}
 	
 	static void test_author_title() {
 		String test_str;
+		String author_str;
+		String title_str;
 		int test_id = 1;
 		
-		test_str = " Falco  -  Rock me    Amadeus .mp3  "; // 1-2
-		test(parseReturnAuthor(test_str), "Falco", test_id++);
-		test(parseReturnTitle(test_str), "Rock me    Amadeus", test_id++);
+		test_str = " Falco  -  Rock me    Amadeus .mp3  "; // 1-4
+		author_str = "Falco";
+		title_str = "Rock me    Amadeus";
+		parsePathname(test_str);
+		parseFilename(test_str);
+		test(getAuthor(), author_str, test_id++);
+		test(getTitle(), title_str, test_id++);
+		test(parseReturnAuthor(test_str), author_str, test_id++);
+		test(parseReturnTitle(test_str), title_str, test_id++);
 		
-		test_str = "Frankie Goes To Hollywood - The Power Of Love.ogg"; // 3-4
-		test(parseReturnAuthor(test_str), "Frankie Goes To Hollywood", test_id++);
-		test(parseReturnTitle(test_str), "The Power Of Love", test_id++);
+		test_str = "Frankie Goes To Hollywood - The Power Of Love.ogg"; // 5-8
+		author_str = "Frankie Goes To Hollywood";
+		title_str = "The Power Of Love";
+		parsePathname(test_str);
+		parseFilename(test_str);
+		test(getAuthor(), author_str, test_id++);
+		test(getTitle(), title_str, test_id++);
+		test(parseReturnAuthor(test_str), author_str, test_id++);
+		test(parseReturnTitle(test_str), title_str, test_id++);
 		
-		test_str = "audiofile.aux"; // 5-6
-		test(parseReturnAuthor(test_str), "", test_id++);
-		test(parseReturnTitle(test_str), "audiofile", test_id++);
+		test_str = "audiofile.aux"; // 9-12
+		author_str = "";
+		title_str = "audiofile";
+		parsePathname(test_str);
+		parseFilename(test_str);
+		test(getAuthor(), author_str, test_id++);
+		test(getTitle(), title_str, test_id++);
+		test(parseReturnAuthor(test_str), author_str, test_id++);
+		test(parseReturnTitle(test_str), title_str, test_id++);
 		
-		test_str = "   A.U.T.O.R   -  T.I.T.E.L  .EXTENSION"; // 7-8
-		test(parseReturnAuthor(test_str), "A.U.T.O.R", test_id++);
-		test(parseReturnTitle(test_str), "T.I.T.E.L", test_id++);
+		test_str = "   A.U.T.O.R   -  T.I.T.E.L  .EXTENSION"; // 13-16
+		author_str = "A.U.T.O.R";
+		title_str = "T.I.T.E.L";
+		parsePathname(test_str);
+		parseFilename(test_str);
+		test(getAuthor(), author_str, test_id++);
+		test(getTitle(), title_str, test_id++);
+		test(parseReturnAuthor(test_str), author_str, test_id++);
+		test(parseReturnTitle(test_str), title_str, test_id++);
 		
-		test_str = "Hans-Georg Sonstwas - Blue-eyed boy-friend.mp3"; // 9-10
-		test(parseReturnAuthor(test_str), "Hans-Georg Sonstwas", test_id++);
-		test(parseReturnTitle(test_str), "Blue-eyed boy-friend", test_id++);
+		test_str = "Hans-Georg Sonstwas - Blue-eyed boy-friend.mp3"; // 17-20
+		author_str = "Hans-Georg Sonstwas";
+		title_str = "Blue-eyed boy-friend";
+		parsePathname(test_str);
+		parseFilename(test_str);
+		test(getAuthor(), author_str, test_id++);
+		test(getTitle(), title_str, test_id++);
+		test(parseReturnAuthor(test_str), author_str, test_id++);
+		test(parseReturnTitle(test_str), title_str, test_id++);
 		
-		test_str = ".mp3"; // 11-12
-		test(parseReturnAuthor(test_str), "", test_id++);
-		test(parseReturnTitle(test_str), "", test_id++);
+		test_str = ".mp3"; // 21-24
+		author_str = "";
+		title_str = "";
+		parsePathname(test_str);
+		parseFilename(test_str);
+		test(getAuthor(), author_str, test_id++);
+		test(getTitle(), title_str, test_id++);
+		test(parseReturnAuthor(test_str), author_str, test_id++);
+		test(parseReturnTitle(test_str), title_str, test_id++);
 		
-		test_str = "Falco - Rock me Amadeus."; // 13-14
-		test(parseReturnAuthor(test_str), "Falco", test_id++);
-		test(parseReturnTitle(test_str), "Rock me Amadeus", test_id++);
+		test_str = "Falco - Rock me Amadeus."; // 25-28
+		author_str = "Falco";
+		title_str = "Rock me Amadeus";
+		parsePathname(test_str);
+		parseFilename(test_str);
+		test(getAuthor(), author_str, test_id++);
+		test(getTitle(), title_str, test_id++);
+		test(parseReturnAuthor(test_str), author_str, test_id++);
+		test(parseReturnTitle(test_str), title_str, test_id++);
 		
-		test_str = " - "; // 15-16
-		test(parseReturnAuthor(test_str), "", test_id++);
-		test(parseReturnTitle(test_str), "-", test_id++);
+		test_str = " - "; // 29-32
+		author_str = "";
+		title_str = "";
+		parsePathname(test_str);
+		parseFilename(test_str);
+		test(getAuthor(), author_str, test_id++);
+		test(getTitle(), title_str, test_id++);
+		test(parseReturnAuthor(test_str), author_str, test_id++);
+		test(parseReturnTitle(test_str), title_str, test_id++);
+		
+		test_str = "-"; // 33-36
+		author_str = "";
+		title_str = "-";
+		parsePathname(test_str);
+		parseFilename(test_str);
+		test(getAuthor(), author_str, test_id++);
+		test(getTitle(), title_str, test_id++);
+		test(parseReturnAuthor(test_str), author_str, test_id++);
+		test(parseReturnTitle(test_str), title_str, test_id++);
+		
+		
+		test_str = "Falco - Rock Me Amadeus.mp3"; // 37-40
+		author_str = "Falco";
+		title_str = "Rock Me Amadeus";
+		parsePathname(test_str);
+		parseFilename(test_str);
+		test(getAuthor(), author_str, test_id++);
+		test(getTitle(), title_str, test_id++);
+		test(parseReturnAuthor(test_str), author_str, test_id++);
+		test(parseReturnTitle(test_str), title_str, test_id++);
+
 	}
 	
 	public static void main(String[] args) {
-		
+
 		test_parse();
 		test_author_title();
+		
+		System.out.println("Done");
 
 	}
 }
