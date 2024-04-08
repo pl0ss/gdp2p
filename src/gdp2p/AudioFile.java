@@ -15,6 +15,7 @@ public class AudioFile {
 		pathname = parseReturnPathname(path, isWindows());
 	}
 	static String parseReturnPathname(String path, boolean isWindows) {
+		String newPathname = path;
 		
 		// wenn path nur aus Leerzeichen und Tabs besteht, dann return ""
 		if(new String(path.trim()).equals("")) {
@@ -26,44 +27,29 @@ public class AudioFile {
 			return "-";
 		}
 		
-		String newPathname = path;
-		String replaceThis;
-		String replaceToThat;
 		
+		// Alle Doppelten / oder \ entfernen
+		{
+			while(newPathname.split("\\\\\\\\").length > 1) {
+				newPathname = newPathname.replaceAll("\\\\\\\\", "\\\\"); // also \\ zu \
+			}
+			
+			while(newPathname.split("//").length > 1) {
+				newPathname = newPathname.replaceAll("//", "/");
+			}
+		}
+		
+		// path immer zu Linux
+		newPathname = newPathname.replaceAll("\\\\", "/");
+		
+		// path zu windows Format, falls windows
 		if(isWindows) {
 			newPathname = newPathname.replaceAll("/", "\\\\");
 		}
-
-		
-//		if(isWindows) {
-//			replaceThis = "\\\\\\\\"; // also \\
-//			replaceToThat = "\\\\"; // zu \
-//		} else {
-//			replaceThis = "//";
-//			replaceToThat = "/";
-//		}
-//		
-//		while(newPathname.split(replaceThis).length > 1) {
-//			newPathname = newPathname.replaceAll(replaceThis, replaceToThat);
-//		}
-		
-		// Alle Doppelten / oder \ entfernen
-		
-		replaceThis = "\\\\\\\\"; // also \\
-		replaceToThat = "\\\\"; // zu \
-		while(newPathname.split(replaceThis).length > 1) {
-			newPathname = newPathname.replaceAll(replaceThis, replaceToThat);
-		}
-		
-		replaceThis = "//";
-		replaceToThat = "/";
-		while(newPathname.split(replaceThis).length > 1) {
-			newPathname = newPathname.replaceAll(replaceThis, replaceToThat);
-		}
 		
 		
+		// drive Replace, falls Linux
 		if(!isWindows) {
-			newPathname = newPathname.replaceAll("\\\\", "/");
 			if(newPathname.charAt(1) == ':') {
 				newPathname = newPathname.replaceAll(":", "");
 				newPathname = '/' + newPathname;
@@ -83,6 +69,7 @@ public class AudioFile {
 		title = parseReturnTitle(filename);
 	}
 	static String parseReturnFilename(String path, boolean isWindows) {
+		path = parseReturnPathname(path, false); // LinuxFormat
 		
 		// wenn path nur aus Leerzeichen und Tabs besteht, dann return ""
 		if(new String(path.trim()).equals("")) {
@@ -94,42 +81,23 @@ public class AudioFile {
 			return "-";
 		}
 		
-		String splitBy;
-		String filename;
-
-		if(isWindows) {
-			splitBy = "\\\\"; // nur zwei machen probleme
-		} else {
-			splitBy = "/";
-		}
 		
-		// Prüfen, on letztes element ein / bzw \\ ist
-		String[] pathArr = path.split("");
-		String letzteZeichen = pathArr[pathArr.length -1];
-		
-		{ // Strings vergleichen
-			// ==
-				// geht nicht, weil Referenzen damit verglichen werden
-			// (int)letzteZeichen.toCharArray()[0] == (int)splitBy.toCharArray()[0]
-				// geht nur wenn String ein zeichen lang ist
-			// new String(letzteZeichen).equals(splitBy)
-				// müsste immer gehen
-		}
-		
-		if(new String(letzteZeichen).equals("\\\\") || new String(letzteZeichen).equals("/")) {
-			filename = "";
-		} else {
-			String thisPath = path;
-			if(isWindows) {
-				thisPath = thisPath.replaceAll("/", "\\\\");
-			}
+		// Prüfen, on letztes element ein / bzw \\ ist: Dann return ""
+		{
+			String[] pathArr = path.split("");
+			String letzteZeichen = pathArr[pathArr.length -1];
 			
-			String[] pathElements = thisPath.split(splitBy);
-			filename = pathElements[pathElements.length -1];
+			if(new String(letzteZeichen).equals("\\\\") || new String(letzteZeichen).equals("/")) {
+				return "";
+			}
 		}
 		
+		// return letztes element zwischen Slashes
+		String[] pathElements = path.split("/");
+		filename = pathElements[pathElements.length -1];
 		return filename;
 	}
+	
 	static String parseReturnAuthor(String filename) {
 		String author = filename;
 		if(author.split(" - ").length > 1) {
@@ -142,6 +110,7 @@ public class AudioFile {
 		
 		return author;
 	}
+	
 	static String parseReturnTitle(String filename) {
 		String title = filename;
 		if(title.split(" - ").length > 1) {
@@ -288,6 +257,18 @@ public class AudioFile {
 		test(parseReturnPathname(test_str, true), "-", test_id++);
 		test(parseReturnFilename(test_str, false), "-", test_id++);
 		test(parseReturnFilename(test_str, true), "-", test_id++);
+		
+		
+		
+		test_str = "home\\meier\\Musik\\Falco - Rock Me Amadeus.mp3"; // 43 - 48
+		parsePathname(test_str);
+		parseFilename(test_str);
+		test(getPathname(), "home/meier/Musik/Falco - Rock Me Amadeus.mp3", test_id++);
+		test(getFilename(), "Falco - Rock Me Amadeus.mp3", test_id++);
+		test(parseReturnPathname(test_str, false), "home/meier/Musik/Falco - Rock Me Amadeus.mp3", test_id++);
+		test(parseReturnPathname(test_str, true), "home\\meier\\Musik\\Falco - Rock Me Amadeus.mp3", test_id++);
+		test(parseReturnFilename(test_str, false), "Falco - Rock Me Amadeus.mp3", test_id++);
+		test(parseReturnFilename(test_str, true), "Falco - Rock Me Amadeus.mp3", test_id++);
 		
 	}
 	
