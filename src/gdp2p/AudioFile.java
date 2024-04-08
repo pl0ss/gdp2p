@@ -8,7 +8,7 @@ public class AudioFile {
 	static String title;
 	
 	
-	static void parsePathname(String path) { // met. nur wegen vorgabe
+	public static void parsePathname(String path) { // met. nur wegen vorgabe
 		parseSetPathname(path);
 	}
 	static void parseSetPathname(String path) {
@@ -31,7 +31,7 @@ public class AudioFile {
 		String replaceToThat;
 		
 		if(isWindows) {
-			newPathname = newPathname.replaceAll("/", "\\\\");
+			newPathname = newPathname.replace("/", "\\\\");
 		}
 
 		
@@ -44,7 +44,7 @@ public class AudioFile {
 //		}
 //		
 //		while(newPathname.split(replaceThis).length > 1) {
-//			newPathname = newPathname.replaceAll(replaceThis, replaceToThat);
+//			newPathname = newPathname.replace(replaceThis, replaceToThat);
 //		}
 		
 		// Alle Doppelten / oder \ entfernen
@@ -52,20 +52,20 @@ public class AudioFile {
 		replaceThis = "\\\\\\\\"; // also \\
 		replaceToThat = "\\\\"; // zu \
 		while(newPathname.split(replaceThis).length > 1) {
-			newPathname = newPathname.replaceAll(replaceThis, replaceToThat);
+			newPathname = newPathname.replace(replaceThis, replaceToThat);
 		}
 		
 		replaceThis = "//";
 		replaceToThat = "/";
 		while(newPathname.split(replaceThis).length > 1) {
-			newPathname = newPathname.replaceAll(replaceThis, replaceToThat);
+			newPathname = newPathname.replace(replaceThis, replaceToThat);
 		}
 		
 		
 		if(!isWindows) {
-			newPathname = newPathname.replaceAll("\\\\", "/");
+			newPathname = newPathname.replace("\\\\", "/");
 			if(newPathname.charAt(1) == ':') {
-				newPathname = newPathname.replaceAll(":", "");
+				newPathname = newPathname.replace(":", "");
 				newPathname = '/' + newPathname;
 			}
 		}
@@ -74,7 +74,7 @@ public class AudioFile {
 	}
 	
 	
-	static void parseFilename(String path) { // met. nur wegen vorgabe
+	public static void parseFilename(String path) { // met. nur wegen vorgabe
 		parseSetFilename(path);
 	}
 	static void parseSetFilename(String path) {
@@ -121,7 +121,7 @@ public class AudioFile {
 		} else {
 			String thisPath = path;
 			if(isWindows) {
-				thisPath = thisPath.replaceAll("/", "\\\\");
+				thisPath = thisPath.replace("/", "\\\\");
 			}
 			
 			String[] pathElements = thisPath.split(splitBy);
@@ -132,7 +132,7 @@ public class AudioFile {
 	}
 	static String parseReturnAuthor(String filename) {
 		String author = filename;
-		if(author.split("-").length > 1) {
+		if(author.split(" - ").length > 1) {
 			author = author.split(" - ")[0];
 		} else { // wenn filename kein " - " enthält
 			author = "";
@@ -144,7 +144,7 @@ public class AudioFile {
 	}
 	static String parseReturnTitle(String filename) {
 		String title = filename;
-		if(title.split("-").length > 1) {
+		if(title.split(" - ").length > 1) {
 			title = title.split(" - ")[1];
 		}
 		
@@ -158,19 +158,19 @@ public class AudioFile {
 		return title;
 	}
 	
-	static String getPathname() {
+	public static String getPathname() {
 		return pathname;
 	}
 	
-	static String getFilename() {
+	public static String getFilename() {
 		return filename;
 	}
 	
-	static String getAuthor() {
+	public static String getAuthor() {
 		return author;
 	}
 	
-	static String getTitle() {
+	public static String getTitle() {
 		return title;
 	}
 	
@@ -322,7 +322,7 @@ public class AudioFile {
 		test(parseReturnAuthor(test_str), "Falco", test_id++);
 		test(parseReturnTitle(test_str), "Rock me Amadeus", test_id++);
 		
-		test_str = "-"; // 15-16
+		test_str = " - "; // 15-16
 		test(parseReturnAuthor(test_str), "", test_id++);
 		test(parseReturnTitle(test_str), "-", test_id++);
 	}
