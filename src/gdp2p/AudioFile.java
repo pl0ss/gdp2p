@@ -31,7 +31,7 @@ public class AudioFile {
 		String replaceToThat;
 		
 		if(isWindows) {
-			newPathname = newPathname.replace("/", "\\\\");
+			newPathname = newPathname.replaceAll("/", "\\\\");
 		}
 
 		
@@ -44,7 +44,7 @@ public class AudioFile {
 //		}
 //		
 //		while(newPathname.split(replaceThis).length > 1) {
-//			newPathname = newPathname.replace(replaceThis, replaceToThat);
+//			newPathname = newPathname.replaceAll(replaceThis, replaceToThat);
 //		}
 		
 		// Alle Doppelten / oder \ entfernen
@@ -52,20 +52,20 @@ public class AudioFile {
 		replaceThis = "\\\\\\\\"; // also \\
 		replaceToThat = "\\\\"; // zu \
 		while(newPathname.split(replaceThis).length > 1) {
-			newPathname = newPathname.replace(replaceThis, replaceToThat);
+			newPathname = newPathname.replaceAll(replaceThis, replaceToThat);
 		}
 		
 		replaceThis = "//";
 		replaceToThat = "/";
 		while(newPathname.split(replaceThis).length > 1) {
-			newPathname = newPathname.replace(replaceThis, replaceToThat);
+			newPathname = newPathname.replaceAll(replaceThis, replaceToThat);
 		}
 		
 		
 		if(!isWindows) {
-			newPathname = newPathname.replace("\\\\", "/");
+			newPathname = newPathname.replaceAll("\\\\", "/");
 			if(newPathname.charAt(1) == ':') {
-				newPathname = newPathname.replace(":", "");
+				newPathname = newPathname.replaceAll(":", "");
 				newPathname = '/' + newPathname;
 			}
 		}
@@ -121,7 +121,7 @@ public class AudioFile {
 		} else {
 			String thisPath = path;
 			if(isWindows) {
-				thisPath = thisPath.replace("/", "\\\\");
+				thisPath = thisPath.replaceAll("/", "\\\\");
 			}
 			
 			String[] pathElements = thisPath.split(splitBy);
@@ -218,6 +218,7 @@ public class AudioFile {
 		String test_str;
 		int test_id = 1;
 		
+		
 		test_str = " "; // 1-6
 		parsePathname(test_str);
 		parseFilename(test_str);
@@ -292,45 +293,98 @@ public class AudioFile {
 	
 	static void test_author_title() {
 		String test_str;
+		String author_str;
+		String title_str;
 		int test_id = 1;
 		
-		test_str = " Falco  -  Rock me    Amadeus .mp3  "; // 1-2
-		test(parseReturnAuthor(test_str), "Falco", test_id++);
-		test(parseReturnTitle(test_str), "Rock me    Amadeus", test_id++);
+		test_str = " Falco  -  Rock me    Amadeus .mp3  "; // 1-4
+		author_str = "Falco";
+		title_str = "Rock me    Amadeus";
+		parsePathname(test_str);
+		parseFilename(test_str);
+		test(getAuthor(), author_str, test_id++);
+		test(getTitle(), title_str, test_id++);
+		test(parseReturnAuthor(test_str), author_str, test_id++);
+		test(parseReturnTitle(test_str), title_str, test_id++);
 		
-		test_str = "Frankie Goes To Hollywood - The Power Of Love.ogg"; // 3-4
-		test(parseReturnAuthor(test_str), "Frankie Goes To Hollywood", test_id++);
-		test(parseReturnTitle(test_str), "The Power Of Love", test_id++);
+		test_str = "Frankie Goes To Hollywood - The Power Of Love.ogg"; // 5-8
+		author_str = "Frankie Goes To Hollywood";
+		title_str = "The Power Of Love";
+		parsePathname(test_str);
+		parseFilename(test_str);
+		test(getAuthor(), author_str, test_id++);
+		test(getTitle(), title_str, test_id++);
+		test(parseReturnAuthor(test_str), author_str, test_id++);
+		test(parseReturnTitle(test_str), title_str, test_id++);
 		
-		test_str = "audiofile.aux"; // 5-6
-		test(parseReturnAuthor(test_str), "", test_id++);
-		test(parseReturnTitle(test_str), "audiofile", test_id++);
+		test_str = "audiofile.aux"; // 9-12
+		author_str = "";
+		title_str = "audiofile";
+		parsePathname(test_str);
+		parseFilename(test_str);
+		test(getAuthor(), author_str, test_id++);
+		test(getTitle(), title_str, test_id++);
+		test(parseReturnAuthor(test_str), author_str, test_id++);
+		test(parseReturnTitle(test_str), title_str, test_id++);
 		
-		test_str = "   A.U.T.O.R   -  T.I.T.E.L  .EXTENSION"; // 7-8
-		test(parseReturnAuthor(test_str), "A.U.T.O.R", test_id++);
-		test(parseReturnTitle(test_str), "T.I.T.E.L", test_id++);
+		test_str = "   A.U.T.O.R   -  T.I.T.E.L  .EXTENSION"; // 13-16
+		author_str = "A.U.T.O.R";
+		title_str = "T.I.T.E.L";
+		parsePathname(test_str);
+		parseFilename(test_str);
+		test(getAuthor(), author_str, test_id++);
+		test(getTitle(), title_str, test_id++);
+		test(parseReturnAuthor(test_str), author_str, test_id++);
+		test(parseReturnTitle(test_str), title_str, test_id++);
 		
-		test_str = "Hans-Georg Sonstwas - Blue-eyed boy-friend.mp3"; // 9-10
-		test(parseReturnAuthor(test_str), "Hans-Georg Sonstwas", test_id++);
-		test(parseReturnTitle(test_str), "Blue-eyed boy-friend", test_id++);
+		test_str = "Hans-Georg Sonstwas - Blue-eyed boy-friend.mp3"; // 17-20
+		author_str = "Hans-Georg Sonstwas";
+		title_str = "Blue-eyed boy-friend";
+		parsePathname(test_str);
+		parseFilename(test_str);
+		test(getAuthor(), author_str, test_id++);
+		test(getTitle(), title_str, test_id++);
+		test(parseReturnAuthor(test_str), author_str, test_id++);
+		test(parseReturnTitle(test_str), title_str, test_id++);
 		
-		test_str = ".mp3"; // 11-12
-		test(parseReturnAuthor(test_str), "", test_id++);
-		test(parseReturnTitle(test_str), "", test_id++);
+		test_str = ".mp3"; // 21-24
+		author_str = "";
+		title_str = "";
+		parsePathname(test_str);
+		parseFilename(test_str);
+		test(getAuthor(), author_str, test_id++);
+		test(getTitle(), title_str, test_id++);
+		test(parseReturnAuthor(test_str), author_str, test_id++);
+		test(parseReturnTitle(test_str), title_str, test_id++);
 		
-		test_str = "Falco - Rock me Amadeus."; // 13-14
-		test(parseReturnAuthor(test_str), "Falco", test_id++);
-		test(parseReturnTitle(test_str), "Rock me Amadeus", test_id++);
+		test_str = "Falco - Rock me Amadeus."; // 25-28
+		author_str = "Falco";
+		title_str = "Rock me Amadeus";
+		parsePathname(test_str);
+		parseFilename(test_str);
+		test(getAuthor(), author_str, test_id++);
+		test(getTitle(), title_str, test_id++);
+		test(parseReturnAuthor(test_str), author_str, test_id++);
+		test(parseReturnTitle(test_str), title_str, test_id++);
 		
-		test_str = " - "; // 15-16
-		test(parseReturnAuthor(test_str), "", test_id++);
-		test(parseReturnTitle(test_str), "-", test_id++);
+		test_str = " - "; // 29-32
+		author_str = "";
+		title_str = "-";
+		parsePathname(test_str);
+		parseFilename(test_str);
+		test(getAuthor(), author_str, test_id++);
+		test(getTitle(), title_str, test_id++);
+		test(parseReturnAuthor(test_str), author_str, test_id++);
+		test(parseReturnTitle(test_str), title_str, test_id++);
+
 	}
 	
 	public static void main(String[] args) {
-		
+
 		test_parse();
 		test_author_title();
+		
+		System.out.println("Done");
 
 	}
 }
