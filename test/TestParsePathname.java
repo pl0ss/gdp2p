@@ -4,8 +4,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import gdp2p.AudioFile;
-
 /**
  * Tests for method AudioFile/parsePathname()
  */
@@ -54,13 +52,13 @@ public class TestParsePathname {
 		String expectedFilename = "Falco - Rock Me Amadeus.mp3";
 		
 		AudioFile af = new AudioFile();
-		AudioFile.parsePathname(pathname);
+		af.parsePathname(pathname);
 		assertEquals("Pathname not correct!", 
 				expectedPathname,
-				AudioFile.getPathname());
+				af.getPathname());
 		assertEquals("Filename is not correct!!",
 				expectedFilename,
-				AudioFile.getFilename());
+				af.getFilename());
 	}
 
 	@Test
@@ -70,13 +68,13 @@ public class TestParsePathname {
 		String expectedFilename = "Frankie Goes To Hollywood - The Power Of Love.ogg";
 		
 		AudioFile af = new AudioFile();
-		AudioFile.parsePathname(pathname);
+		af.parsePathname(pathname);
 		assertEquals("Pathname not correct!", 
 				expectedPathname,
-				AudioFile.getPathname());
+				af.getPathname());
 		assertEquals("Filename is not correct!!",
 				expectedFilename,
-				AudioFile.getFilename());
+				af.getFilename());
 	}
 
 	@Test
@@ -86,13 +84,13 @@ public class TestParsePathname {
 		String expectedFilename = "Deep Purple - Smoke On The Water.wav";
 		
 		AudioFile af = new AudioFile();
-		AudioFile.parsePathname(pathname);
+		af.parsePathname(pathname);
 		assertEquals("Pathname not correct!", 
 				expectedPathname,
-				AudioFile.getPathname());
+				af.getPathname());
 		assertEquals("Filename is not correct!!",
 				expectedFilename,
-				AudioFile.getFilename());
+				af.getFilename());
 	}
 
 	@Test
@@ -102,13 +100,13 @@ public class TestParsePathname {
 		String expectedFilename = "file.mp3";
 		
 		AudioFile af = new AudioFile();
-		AudioFile.parsePathname(pathname);
+		af.parsePathname(pathname);
 		assertEquals("Pathname not correct!", 
 				expectedPathname,
-				AudioFile.getPathname());
+				af.getPathname());
 		assertEquals("Filename is not correct!!",
 				expectedFilename,
-				AudioFile.getFilename());
+				af.getFilename());
 	}
 
 	@Test
@@ -118,13 +116,13 @@ public class TestParsePathname {
 		String expectedFilename = "Falco - Rock Me Amadeus.mp3";
 		
 		AudioFile af = new AudioFile();
-		AudioFile.parsePathname(pathname);
+		af.parsePathname(pathname);
 		assertEquals("Pathname not correct!", 
 				expectedPathname,
-				AudioFile.getPathname());
+				af.getPathname());
 		assertEquals("Filename is not correct!!",
 				expectedFilename,
-				AudioFile.getFilename());
+				af.getFilename());
 	}
 
 	@Test
@@ -134,13 +132,13 @@ public class TestParsePathname {
 		String expectedFilename = "file.mp3";
 		
 		AudioFile af = new AudioFile();
-		AudioFile.parsePathname(pathname);
+		af.parsePathname(pathname);
 		assertEquals("Pathname not correct!", 
 				expectedPathname,
-				AudioFile.getPathname());
+				af.getPathname());
 		assertEquals("Filename is not correct!!",
 				expectedFilename,
-				AudioFile.getFilename());
+				af.getFilename());
 	}
 
 	@Test
@@ -150,13 +148,13 @@ public class TestParsePathname {
 		String expectedFilename = "audiofile.au";
 		
 		AudioFile af = new AudioFile();
-		AudioFile.parsePathname(pathname);
+		af.parsePathname(pathname);
 		assertEquals("Pathname not correct!", 
 				expectedPathname,
-				AudioFile.getPathname());
+				af.getPathname());
 		assertEquals("Filename is not correct!!",
 				expectedFilename,
-				AudioFile.getFilename());
+				af.getFilename());
 	}
 
 	@Test
@@ -166,13 +164,13 @@ public class TestParsePathname {
 		String expectedFilename = "A.U.T.O.R   -   T.I.T.E.L   .EXTENSION";
 		
 		AudioFile af = new AudioFile();
-		AudioFile.parsePathname(pathname);
+		af.parsePathname(pathname);
 		assertEquals("Pathname not correct!", 
 				expectedPathname,
-				AudioFile.getPathname());
+				af.getPathname());
 		assertEquals("Filename is not correct!!",
 				expectedFilename,
-				AudioFile.getFilename());
+				af.getFilename());
 	}
 
 	@Test
@@ -182,13 +180,13 @@ public class TestParsePathname {
 		String expectedFilename = "Hans-Georg Sonstwas - Blue-eyed boy-friend.mp3";
 		
 		AudioFile af = new AudioFile();
-		AudioFile.parsePathname(pathname);
+		af.parsePathname(pathname);
 		assertEquals("Pathname not correct!", 
 				expectedPathname,
-				AudioFile.getPathname());
+				af.getPathname());
 		assertEquals("Filename is not correct!!",
 				expectedFilename,
-				AudioFile.getFilename());
+				af.getFilename());
 	}
 
 	@Test
@@ -198,13 +196,13 @@ public class TestParsePathname {
 		String expectedFilename = "";
 		
 		AudioFile af = new AudioFile();
-		AudioFile.parsePathname(pathname);
+		af.parsePathname(pathname);
 		assertEquals("Pathname not correct!", 
 				expectedPathname,
-				AudioFile.getPathname());
+				af.getPathname());
 		assertEquals("Filename is not correct!!",
 				expectedFilename,
-				AudioFile.getFilename());
+				af.getFilename());
 	}
 
 	@Test
@@ -214,13 +212,13 @@ public class TestParsePathname {
 		String expectedFilename = "";
 		
 		AudioFile af = new AudioFile();
-		AudioFile.parsePathname(pathname);
+		af.parsePathname(pathname);
 		assertEquals("Pathname not correct!", 
 				expectedPathname,
-				AudioFile.getPathname());
+				af.getPathname());
 		assertEquals("Filename is not correct!!",
 				expectedFilename,
-				AudioFile.getFilename());
+				af.getFilename());
 	}
 
 	@Test
@@ -230,13 +228,13 @@ public class TestParsePathname {
 		String expectedFilename = "";
 		
 		AudioFile af = new AudioFile();
-		AudioFile.parsePathname(pathname);
+		af.parsePathname(pathname);
 		assertEquals("Pathname not correct!", 
 				expectedPathname,
-				AudioFile.getPathname());
+				af.getPathname());
 		assertEquals("Filename is not correct!!",
 				expectedFilename,
-				AudioFile.getFilename());
+				af.getFilename());
 	}
 
 	@Test
@@ -247,13 +245,13 @@ public class TestParsePathname {
 		String expectedFilename = "";
 		
 		AudioFile af = new AudioFile();
-		AudioFile.parsePathname(pathname);
+		af.parsePathname(pathname);
 		assertEquals("Pathname not correct!", 
 				expectedPathname,
-				AudioFile.getPathname());
+				af.getPathname());
 		assertEquals("Filename is not correct!!",
 				expectedFilename,
-				AudioFile.getFilename());
+				af.getFilename());
 	}
 
 	@Test
@@ -263,13 +261,13 @@ public class TestParsePathname {
 		String expectedFilename = "file.mp3";
 		
 		AudioFile af = new AudioFile();
-		AudioFile.parsePathname(pathname);
+		af.parsePathname(pathname);
 		assertEquals("Pathname not correct!", 
 				expectedPathname,
-				AudioFile.getPathname());
+				af.getPathname());
 		assertEquals("Filename is not correct!!",
 				expectedFilename,
-				AudioFile.getFilename());
+				af.getFilename());
 	}
 
 	@Test
@@ -279,13 +277,13 @@ public class TestParsePathname {
 		String expectedFilename = "";
 		
 		AudioFile af = new AudioFile();
-		AudioFile.parsePathname(pathname);
+		af.parsePathname(pathname);
 		assertEquals("Pathname not correct!", 
 				expectedPathname,
-				AudioFile.getPathname());
+				af.getPathname());
 		assertEquals("Filename is not correct!!",
 				expectedFilename,
-				AudioFile.getFilename());
+				af.getFilename());
 	}
 
 	@Test
@@ -295,13 +293,13 @@ public class TestParsePathname {
 		String expectedFilename = "file.mp3";
 		
 		AudioFile af = new AudioFile();
-		AudioFile.parsePathname(pathname);
+		af.parsePathname(pathname);
 		assertEquals("Pathname not correct!", 
 				expectedPathname,
-				AudioFile.getPathname());
+				af.getPathname());
 		assertEquals("Filename is not correct!!",
 				expectedFilename,
-				AudioFile.getFilename());
+				af.getFilename());
 	}
 
 	@Test
@@ -311,13 +309,13 @@ public class TestParsePathname {
 		String expectedFilename = ".nox";
 		
 		AudioFile af = new AudioFile();
-		AudioFile.parsePathname(pathname);
+		af.parsePathname(pathname);
 		assertEquals("Pathname not correct!", 
 				expectedPathname,
-				AudioFile.getPathname());
+				af.getPathname());
 		assertEquals("Filename is not correct!!",
 				expectedFilename,
-				AudioFile.getFilename());
+				af.getFilename());
 	}
 
 
@@ -328,13 +326,13 @@ public class TestParsePathname {
 		String expectedFilename = "Falco - Rock me Amadeus.";
 		
 		AudioFile af = new AudioFile();
-		AudioFile.parsePathname(pathname);
+		af.parsePathname(pathname);
 		assertEquals("Pathname not correct!", 
 				expectedPathname,
-				AudioFile.getPathname());
+				af.getPathname());
 		assertEquals("Filename is not correct!!",
 				expectedFilename,
-				AudioFile.getFilename());
+				af.getFilename());
 	}
 
 	@Test
@@ -344,13 +342,13 @@ public class TestParsePathname {
 		String expectedFilename = "-";
 		
 		AudioFile af = new AudioFile();
-		AudioFile.parsePathname(pathname);
+		af.parsePathname(pathname);
 		assertEquals("Pathname not correct!", 
 				expectedPathname,
-				AudioFile.getPathname());
+				af.getPathname());
 		assertEquals("Filename is not correct!!",
 				expectedFilename,
-				AudioFile.getFilename());
+				af.getFilename());
 	}
 
 	@Test
@@ -360,12 +358,12 @@ public class TestParsePathname {
 		String expectedFilename = "-";
 		
 		AudioFile af = new AudioFile();
-		AudioFile.parsePathname(pathname);
+		af.parsePathname(pathname);
 		assertEquals("Pathname not correct!", 
 				expectedPathname,
-				AudioFile.getPathname());
+				af.getPathname());
 		assertEquals("Filename is not correct!!",
 				expectedFilename,
-				AudioFile.getFilename());
+				af.getFilename());
 	}
 }
