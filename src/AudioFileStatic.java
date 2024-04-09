@@ -1,54 +1,54 @@
 
 
-public class AudioFile {
+public class AudioFileStatic {
 	// AudioFile
-	private String pathname;
-	private String filename;
-	private String author;
-	private String title;
+	private static String pathname;
+	private static String filename;
+	private static String author;
+	private static String title;
 	
 	
-	public String getPathname() {
+	public static String getPathname() {
 		return pathname;
 	}
-	private void setPathname(String pathname) {
-		this.pathname = pathname;
+	private static void setPathname(String pathname) {
+		AudioFileStatic.pathname = pathname;
 	}
 	
-	public String getFilename() {
+	public static String getFilename() {
 		return filename;
 	}
-	public void setFilename(String filename) {
-		this.filename = filename;
+	public static void setFilename(String name) {
+		filename = name;
 	}
 	
-	public String getAuthor() {
+	public static String getAuthor() {
 		return author;
 	}
-	public void setAuthor(String author) {
-		this.author = author;
+	public static void setAuthor(String name) {
+		author = name;
 	}
 	
-	public String getTitle() {
+	public static String getTitle() {
 		return title;
 	}
-	public void setTitle(String title) {
-		this.title = title;
+	public static void setTitle(String name) {
+		title = name;
 	}
 
 
-	private boolean isWindows() {
+	private static boolean isWindows() {
 		return System.getProperty("os.name").toLowerCase().indexOf("win") >= 0;
 	}
 	
 	
-	public void parsePathname(String path) { // met. nur wegen vorgabe
+	public static void parsePathname(String path) { // met. nur wegen vorgabe
 		setPathname(parseReturnPathname(path));
 	}
-	private String parseReturnPathname(String path) {
+	private static String parseReturnPathname(String path) {
 		return parseReturnPathname(path, isWindows());
 	}
-	private String parseReturnPathname(String path, boolean isWindows) {
+	private static String parseReturnPathname(String path, boolean isWindows) {
 		String newPathname = path;
 		
 		// wenn path nur aus Leerzeichen und Tabs besteht, dann return ""
@@ -94,18 +94,18 @@ public class AudioFile {
 	}
 	
 	
-	public void parseFilename(String path) { // met. nur wegen vorgabe
+	public static void parseFilename(String path) { // met. nur wegen vorgabe
 		parseSetFilename(path);
 	}
-	private void parseSetFilename(String path) {
+	private static void parseSetFilename(String path) {
 		setFilename(parseReturnFilename(path));
 		setAuthor(parseReturnAuthor(path));
 		setTitle(parseReturnTitle(path));
 	}
-	private String parseReturnFilename(String path) {
+	private static String parseReturnFilename(String path) {
 		return parseReturnFilename(path, isWindows());
 	}
-	private String parseReturnFilename(String path, boolean isWindows) {
+	private static String parseReturnFilename(String path, boolean isWindows) {
 		path = parseReturnPathname(path, false); // LinuxFormat
 		
 		// wenn path nur aus Leerzeichen und Tabs besteht, dann return ""
@@ -135,7 +135,7 @@ public class AudioFile {
 		return filename;
 	}
 	
-	private String parseReturnAuthor(String path) {
+	private static String parseReturnAuthor(String path) {
 		String author = parseReturnFilename(path);
 		if(author.split(" - ").length > 1) {
 			author = author.split(" - ")[0];
@@ -148,7 +148,7 @@ public class AudioFile {
 		return author;
 	}
 	
-	private String parseReturnTitle(String path) {
+	private static String parseReturnTitle(String path) {
 		
 		// falls " - " als path übergeben wird (JUnitTest), kann bei pathname nie entstehen
 		if(new String(path).equals("-")) {
@@ -203,20 +203,18 @@ public class AudioFile {
 		System.out.println();
 	}
 	
-	private boolean test_correct_show = false; 
-	
-	public void test(String a, String b) {
-		if(test_correct_show || !new String(a).equals(b)) {
+	private void test(String a, String b) {
+		if(!new String(a).equals(b)) {
 			System.out.printf("%b %s %s\n", new String(a).equals(b), a, b);
 		}
 	}
-	public void test(String a, String b, int id) { // id ist frei wählbar
-		if(test_correct_show || !new String(a).equals(b)) {
+	private static void test(String a, String b, int id) { // id ist frei wählbar
+		if(!new String(a).equals(b)) {
 			System.out.printf("%d\t%b\t%s\t%s\n", id, new String(a).equals(b), a, b);
 		}
 	}
 	
-	private void test_parse() {
+	private static void test_parse() {
 		String test_str;
 		int test_id = 1;
 		
@@ -303,10 +301,9 @@ public class AudioFile {
 		test(parseReturnFilename(test_str, false), "Falco - Rock Me Amadeus.mp3", test_id++);
 		test(parseReturnFilename(test_str, true), "Falco - Rock Me Amadeus.mp3", test_id++);
 		
-		log("test_id: " + test_id);
 	}
 	
-	private void test_author_title() {
+	private static void test_author_title() {
 		String test_str;
 		String author_str;
 		String title_str;
@@ -412,15 +409,13 @@ public class AudioFile {
 		test(getTitle(), title_str, test_id++);
 		test(parseReturnAuthor(test_str), author_str, test_id++);
 		test(parseReturnTitle(test_str), title_str, test_id++);
-		
-		log("test_id: " + test_id);
+
 	}
 	
 	public static void main(String[] args) {
 
-		AudioFile testAudio = new AudioFile();
-		testAudio.test_parse();
-		testAudio.test_author_title();
+		test_parse();
+		test_author_title();
 		
 		System.out.println("Done");
 
