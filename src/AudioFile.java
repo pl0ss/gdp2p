@@ -8,11 +8,45 @@ public class AudioFile {
 	static String title;
 	
 	
-	public static void parsePathname(String path) { // met. nur wegen vorgabe
-		parseSetPathname(path);
+	public static String getPathname() {
+		return pathname;
 	}
-	static void parseSetPathname(String path) {
-		pathname = parseReturnPathname(path, isWindows());
+	static void setPathname(String path) {
+		pathname = path;
+	}
+	
+	public static String getFilename() {
+		return filename;
+	}
+	public static void setFilename(String name) {
+		filename = name;
+	}
+	
+	public static String getAuthor() {
+		return author;
+	}
+	public static void setAuthor(String name) {
+		author = name;
+	}
+	
+	public static String getTitle() {
+		return title;
+	}
+	public static void setTitle(String name) {
+		title = name;
+	}
+
+
+	private static boolean isWindows() {
+		return System.getProperty("os.name").toLowerCase().indexOf("win") >= 0;
+	}
+	
+	
+	public static void parsePathname(String path) { // met. nur wegen vorgabe
+		setPathname(parseReturnPathname(path));
+	}
+	static String parseReturnPathname(String path) {
+		return parseReturnPathname(path, isWindows());
 	}
 	static String parseReturnPathname(String path, boolean isWindows) {
 		String newPathname = path;
@@ -64,9 +98,12 @@ public class AudioFile {
 		parseSetFilename(path);
 	}
 	static void parseSetFilename(String path) {
-		filename = parseReturnFilename(path, isWindows());
-		author = parseReturnAuthor(filename);
-		title = parseReturnTitle(path);
+		setFilename(parseReturnFilename(path));
+		setAuthor(parseReturnAuthor(path));
+		setTitle(parseReturnTitle(path));
+	}
+	static String parseReturnFilename(String path) {
+		return parseReturnFilename(path, isWindows());
 	}
 	static String parseReturnFilename(String path, boolean isWindows) {
 		path = parseReturnPathname(path, false); // LinuxFormat
@@ -98,8 +135,8 @@ public class AudioFile {
 		return filename;
 	}
 	
-	static String parseReturnAuthor(String filename) {
-		String author = filename;
+	static String parseReturnAuthor(String path) {
+		String author = parseReturnFilename(path);
 		if(author.split(" - ").length > 1) {
 			author = author.split(" - ")[0];
 		} else { // wenn filename kein " - " enthält
@@ -123,7 +160,7 @@ public class AudioFile {
 		}
 		
 
-		String title = pathname;
+		String title = parseReturnFilename(path);
 		
 		if(title.split(" - ").length > 1) {
 			title = title.split(" - ")[1];
@@ -140,25 +177,6 @@ public class AudioFile {
 		return title;
 	}
 	
-	public static String getPathname() {
-		return pathname;
-	}
-	
-	public static String getFilename() {
-		return filename;
-	}
-	
-	public static String getAuthor() {
-		return author;
-	}
-	
-	public static String getTitle() {
-		return title;
-	}
-	
-	private static boolean isWindows() {
-		return System.getProperty("os.name").toLowerCase().indexOf("win") >= 0;
-	}
 	
 	static void log(String str) { // Log String
 		System.out.println(str);
