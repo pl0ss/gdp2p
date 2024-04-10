@@ -44,6 +44,7 @@ public class AudioFile {
 	
 	public void parsePathname(String path) { // met. nur wegen vorgabe
 		setPathname(parseReturnPathname(path));
+		parseSetFilename(path); // wegen JUnit test
 	}
 	private String parseReturnPathname(String path) {
 		return parseReturnPathname(path, isWindows());
@@ -75,6 +76,13 @@ public class AudioFile {
 		
 		// path immer zu Linux
 		newPathname = newPathname.replaceAll("\\\\", "/");
+		
+		// wenn newPathname kein / enthält, dann trim
+			// nicht trim: "  /my-tmp/file.mp3"
+			// trim "  A.U.T.O.R   -   T.I.T.E.L   .EXTENSION"
+		if(newPathname.split("/").length == 1) {
+			newPathname = newPathname.trim();
+		}
 		
 		// path zu windows Format, falls windows
 		if(isWindows) {
@@ -132,6 +140,7 @@ public class AudioFile {
 		// return letztes element zwischen Slashes
 		String[] pathElements = path.split("/");
 		filename = pathElements[pathElements.length -1];
+		
 		return filename;
 	}
 	
