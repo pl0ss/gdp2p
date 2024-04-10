@@ -1,11 +1,21 @@
 
 
 public class AudioFile {
-	// AudioFile
 	private String pathname;
 	private String filename;
 	private String author;
 	private String title;
+	
+	AudioFile() {
+		setPathname("");
+		setFilename("");
+		setAuthor("");
+		setTitle("");
+	}
+	
+	AudioFile(String path) {
+		parsePathname(path);
+	}
 	
 	
 	public String getPathname() {
@@ -44,7 +54,7 @@ public class AudioFile {
 	
 	public void parsePathname(String path) { // met. nur wegen vorgabe
 		setPathname(parseReturnPathname(path));
-		parseSetFilename(path); // wegen JUnit test
+		parseFilename(path); // wegen JUnit test
 	}
 	private String parseReturnPathname(String path) {
 		return parseReturnPathname(path, isWindows());
@@ -103,9 +113,6 @@ public class AudioFile {
 	
 	
 	public void parseFilename(String path) { // met. nur wegen vorgabe
-		parseSetFilename(path);
-	}
-	private void parseSetFilename(String path) {
 		setFilename(parseReturnFilename(path));
 		setAuthor(parseReturnAuthor(path));
 		setTitle(parseReturnTitle(path));
