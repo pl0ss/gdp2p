@@ -1,5 +1,3 @@
-
-
 public class AudioFile {
 	private String pathname;
 	private String filename;
@@ -7,13 +5,14 @@ public class AudioFile {
 	private String title;
 	
 	AudioFile() {
-		setPathname("");
-		setFilename("");
-		setAuthor("");
-		setTitle("");
+		this.pathname = "";
+		this.filename = "";
+		this.author = "";
+		this.title = "";
 	}
 	
 	AudioFile(String path) {
+		this();
 		parsePathname(path);
 	}
 	
@@ -165,7 +164,6 @@ public class AudioFile {
 	}
 	
 	private String parseReturnTitle(String path) {
-		
 		// falls " - " als path übergeben wird (JUnitTest), kann bei pathname nie entstehen
 		if(new String(path).equals("-")) {
 			return "-";
@@ -175,13 +173,11 @@ public class AudioFile {
 			return "";
 		}
 		
-
 		String title = parseReturnFilename(path);
 		
 		if(title.split(" - ").length > 1) {
 			title = title.split(" - ")[1];
 		}
-		
 		
 		int posLetzterPunkt = title.lastIndexOf(".");
 		if(posLetzterPunkt >= 0) {
@@ -193,252 +189,21 @@ public class AudioFile {
 		return title;
 	}
 	
-	
-	private void log(String str) { // Log String
-		System.out.println(str);
-	}
-	private void log(long num) { // Log Long
-		System.out.println(num);
-	}
-	private void log(double num) { // Log Double
-		System.out.println(num);
-	}
-	private void log(boolean x) { // Log boolean
-		System.out.println(x);
-	}
-	private void log(String[] arr) {
-		for (int i = 0; i < arr.length; i++) { // Log String Array
-			System.out.printf("i:%d\t%s\n", i, arr[i]);
+	public String toString() {
+		if(this.pathname.equals("-")) { // wegen JUnit test
+			return "-";
 		}
-		System.out.println();
-	}
-	private void log(double[] arr) {
-		for (int i = 0; i < arr.length; i++) { // Log Double Array
-			System.out.printf("i:%d\t%s\n", i, arr[i]);
+		if(this.author.equals("")) {
+			return this.title;
 		}
-		System.out.println();
-	}
-	
-	private boolean test_correct_show = false; 
-	
-	public void test(String a, String b) {
-		if(test_correct_show || !new String(a).equals(b)) {
-			System.out.printf("%b %s %s\n", new String(a).equals(b), a, b);
+		if(this.title.equals("")) {
+			return this.author;
 		}
-	}
-	public void test(String a, String b, int id) { // id ist frei wählbar
-		if(test_correct_show || !new String(a).equals(b)) {
-			System.out.printf("%d\t%b\t%s\t%s\n", id, new String(a).equals(b), a, b);
-		}
-	}
-	
-	private void test_parse() {
-		String test_str;
-		int test_id = 1;
 		
-		
-		test_str = " "; // 1-6
-		parsePathname(test_str);
-		parseFilename(test_str);
-		test(getPathname(), "", test_id++);
-		test(getFilename(), "", test_id++);
-		test(parseReturnPathname(test_str, false), "", test_id++);
-		test(parseReturnPathname(test_str, true), "", test_id++);
-		test(parseReturnFilename(test_str, false), "", test_id++);
-		test(parseReturnFilename(test_str, true), "", test_id++);
-		
-		test_str = "file.mp3"; // 7-12
-		parsePathname(test_str);
-		parseFilename(test_str);
-		test(getPathname(), "file.mp3", test_id++);
-		test(getFilename(), "file.mp3", test_id++);
-		test(parseReturnPathname(test_str, false), "file.mp3", test_id++);
-		test(parseReturnPathname(test_str, true), "file.mp3", test_id++);
-		test(parseReturnFilename(test_str, false), "file.mp3", test_id++);
-		test(parseReturnFilename(test_str, true), "file.mp3", test_id++);
-		
-		test_str = "  /my-tmp/file.mp3"; // 13-18
-		parsePathname(test_str);
-		parseFilename(test_str);
-		test(getPathname(), "  /my-tmp/file.mp3", test_id++);
-		test(getFilename(), "file.mp3", test_id++);
-		test(parseReturnPathname(test_str, false), "  /my-tmp/file.mp3", test_id++);
-		test(parseReturnPathname(test_str, true), "  \\my-tmp\\file.mp3", test_id++);
-		test(parseReturnFilename(test_str, false), "file.mp3", test_id++);
-		test(parseReturnFilename(test_str, true), "file.mp3", test_id++);
-		
-		test_str = "//my-tmp////part1//file.mp3/"; // 19-24
-		parsePathname(test_str);
-		parseFilename(test_str);
-		test(getPathname(), "/my-tmp/part1/file.mp3/", test_id++);
-		test(getFilename(), "", test_id++);
-		test(parseReturnPathname(test_str, false), "/my-tmp/part1/file.mp3/", test_id++);
-		test(parseReturnPathname(test_str, true), "\\my-tmp\\part1\\file.mp3\\", test_id++);
-		test(parseReturnFilename(test_str, false), "", test_id++);
-		test(parseReturnFilename(test_str, true), "", test_id++);
-		
-		test_str = "d:\\\\\\\\part1///file.mp3"; // 25 - 30
-		parsePathname(test_str);
-		parseFilename(test_str);
-		test(getPathname(), "/d/part1/file.mp3", test_id++);
-		test(getFilename(), "file.mp3", test_id++);
-		test(parseReturnPathname(test_str, false), "/d/part1/file.mp3", test_id++);
-		test(parseReturnPathname(test_str, true), "d:\\part1\\file.mp3", test_id++);
-		test(parseReturnFilename(test_str, false), "file.mp3", test_id++);
-		test(parseReturnFilename(test_str, true), "file.mp3", test_id++);
-		
-		test_str = "-"; // 31 - 36
-		parsePathname(test_str);
-		parseFilename(test_str);
-		test(getPathname(), "-", test_id++);
-		test(getFilename(), "-", test_id++);
-		test(parseReturnPathname(test_str, false), "-", test_id++);
-		test(parseReturnPathname(test_str, true), "-", test_id++);
-		test(parseReturnFilename(test_str, false), "-", test_id++);
-		test(parseReturnFilename(test_str, true), "-", test_id++);
-		
-		test_str = " - "; // 37 - 42
-		parsePathname(test_str);
-		parseFilename(test_str);
-		test(getPathname(), "-", test_id++);
-		test(getFilename(), "-", test_id++);
-		test(parseReturnPathname(test_str, false), "-", test_id++);
-		test(parseReturnPathname(test_str, true), "-", test_id++);
-		test(parseReturnFilename(test_str, false), "-", test_id++);
-		test(parseReturnFilename(test_str, true), "-", test_id++);
-		
-		
-		
-		test_str = "home\\meier\\Musik\\Falco - Rock Me Amadeus.mp3"; // 43 - 48
-		parsePathname(test_str);
-		parseFilename(test_str);
-		test(getPathname(), "home/meier/Musik/Falco - Rock Me Amadeus.mp3", test_id++);
-		test(getFilename(), "Falco - Rock Me Amadeus.mp3", test_id++);
-		test(parseReturnPathname(test_str, false), "home/meier/Musik/Falco - Rock Me Amadeus.mp3", test_id++);
-		test(parseReturnPathname(test_str, true), "home\\meier\\Musik\\Falco - Rock Me Amadeus.mp3", test_id++);
-		test(parseReturnFilename(test_str, false), "Falco - Rock Me Amadeus.mp3", test_id++);
-		test(parseReturnFilename(test_str, true), "Falco - Rock Me Amadeus.mp3", test_id++);
-		
-		log("test_id: " + test_id);
-	}
-	
-	private void test_author_title() {
-		String test_str;
-		String author_str;
-		String title_str;
-		int test_id = 1;
-		
-		test_str = " Falco  -  Rock me    Amadeus .mp3  "; // 1-4
-		author_str = "Falco";
-		title_str = "Rock me    Amadeus";
-		parsePathname(test_str);
-		parseFilename(test_str);
-		test(getAuthor(), author_str, test_id++);
-		test(getTitle(), title_str, test_id++);
-		test(parseReturnAuthor(test_str), author_str, test_id++);
-		test(parseReturnTitle(test_str), title_str, test_id++);
-		
-		test_str = "Frankie Goes To Hollywood - The Power Of Love.ogg"; // 5-8
-		author_str = "Frankie Goes To Hollywood";
-		title_str = "The Power Of Love";
-		parsePathname(test_str);
-		parseFilename(test_str);
-		test(getAuthor(), author_str, test_id++);
-		test(getTitle(), title_str, test_id++);
-		test(parseReturnAuthor(test_str), author_str, test_id++);
-		test(parseReturnTitle(test_str), title_str, test_id++);
-		
-		test_str = "audiofile.aux"; // 9-12
-		author_str = "";
-		title_str = "audiofile";
-		parsePathname(test_str);
-		parseFilename(test_str);
-		test(getAuthor(), author_str, test_id++);
-		test(getTitle(), title_str, test_id++);
-		test(parseReturnAuthor(test_str), author_str, test_id++);
-		test(parseReturnTitle(test_str), title_str, test_id++);
-		
-		test_str = "   A.U.T.O.R   -  T.I.T.E.L  .EXTENSION"; // 13-16
-		author_str = "A.U.T.O.R";
-		title_str = "T.I.T.E.L";
-		parsePathname(test_str);
-		parseFilename(test_str);
-		test(getAuthor(), author_str, test_id++);
-		test(getTitle(), title_str, test_id++);
-		test(parseReturnAuthor(test_str), author_str, test_id++);
-		test(parseReturnTitle(test_str), title_str, test_id++);
-		
-		test_str = "Hans-Georg Sonstwas - Blue-eyed boy-friend.mp3"; // 17-20
-		author_str = "Hans-Georg Sonstwas";
-		title_str = "Blue-eyed boy-friend";
-		parsePathname(test_str);
-		parseFilename(test_str);
-		test(getAuthor(), author_str, test_id++);
-		test(getTitle(), title_str, test_id++);
-		test(parseReturnAuthor(test_str), author_str, test_id++);
-		test(parseReturnTitle(test_str), title_str, test_id++);
-		
-		test_str = ".mp3"; // 21-24
-		author_str = "";
-		title_str = "";
-		parsePathname(test_str);
-		parseFilename(test_str);
-		test(getAuthor(), author_str, test_id++);
-		test(getTitle(), title_str, test_id++);
-		test(parseReturnAuthor(test_str), author_str, test_id++);
-		test(parseReturnTitle(test_str), title_str, test_id++);
-		
-		test_str = "Falco - Rock me Amadeus."; // 25-28
-		author_str = "Falco";
-		title_str = "Rock me Amadeus";
-		parsePathname(test_str);
-		parseFilename(test_str);
-		test(getAuthor(), author_str, test_id++);
-		test(getTitle(), title_str, test_id++);
-		test(parseReturnAuthor(test_str), author_str, test_id++);
-		test(parseReturnTitle(test_str), title_str, test_id++);
-		
-		test_str = " - "; // 29-32
-		author_str = "";
-		title_str = "";
-		parsePathname(test_str);
-		parseFilename(test_str);
-		test(getAuthor(), author_str, test_id++);
-		test(getTitle(), title_str, test_id++);
-		test(parseReturnAuthor(test_str), author_str, test_id++);
-		test(parseReturnTitle(test_str), title_str, test_id++);
-		
-		test_str = "-"; // 33-36
-		author_str = "";
-		title_str = "-";
-		parsePathname(test_str);
-		parseFilename(test_str);
-		test(getAuthor(), author_str, test_id++);
-		test(getTitle(), title_str, test_id++);
-		test(parseReturnAuthor(test_str), author_str, test_id++);
-		test(parseReturnTitle(test_str), title_str, test_id++);
-		
-		
-		test_str = "Falco - Rock Me Amadeus.mp3"; // 37-40
-		author_str = "Falco";
-		title_str = "Rock Me Amadeus";
-		parsePathname(test_str);
-		parseFilename(test_str);
-		test(getAuthor(), author_str, test_id++);
-		test(getTitle(), title_str, test_id++);
-		test(parseReturnAuthor(test_str), author_str, test_id++);
-		test(parseReturnTitle(test_str), title_str, test_id++);
-		
-		log("test_id: " + test_id);
+		return this.author + " - " + this.title;
 	}
 	
 	public static void main(String[] args) {
-
-		AudioFile testAudio = new AudioFile();
-		testAudio.test_parse();
-		testAudio.test_author_title();
-		
-		System.out.println("Done");
 
 	}
 }
