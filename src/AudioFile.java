@@ -107,6 +107,10 @@ public class AudioFile {
 			}
 		}
 		
+		if(newPathname.equals(" ")) {
+			newPathname = "";
+		}
+		
 		return newPathname;
 	}
 	
