@@ -106,10 +106,11 @@ public class AudioFile {
 				newPathname = '/' + newPathname;
 			}
 		}
-		
-		if(newPathname.equals(" ")) {
-			newPathname = "";
-		}
+
+		// Entferne spaces am ende
+		while (newPathname.charAt(newPathname.length() - 1) == ' ') {
+            newPathname = newPathname.substring(0, newPathname.length() - 1);
+        }
 		
 		return newPathname;
 	}
@@ -149,9 +150,11 @@ public class AudioFile {
 		
 		// return letztes element zwischen Slashes
 		String[] pathElements = path.split("/");
-		filename = pathElements[pathElements.length -1];
+		String newFilename = pathElements[pathElements.length -1];
+
+		newFilename = newFilename.trim();
 		
-		return filename;
+		return newFilename;
 	}
 	
 	private String parseReturnAuthor(String path) {
