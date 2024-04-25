@@ -6,6 +6,7 @@ public abstract class SampledFile extends AudioFile {
 	 */
 	
 	long duration = 0;
+	
 
 	SampledFile() {
 		

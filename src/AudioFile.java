@@ -12,6 +12,7 @@ public abstract class AudioFile {
 	private String filename;
 	private String author;
 	private String title;
+
 	
 	AudioFile() {
 		this.pathname = "";
