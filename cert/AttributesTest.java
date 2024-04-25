@@ -1,7 +1,6 @@
 import static java.lang.reflect.Modifier.isFinal;
 import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -11,37 +10,37 @@ import org.junit.Test;
 
 @SuppressWarnings("rawtypes")
 public class AttributesTest {
-    // Liste aller Klassen
+    // List of all classes
     private Class[] clazzA = {
-    	AudioFile.class,
-    };
-    
-    private String[] attributeNames = {
-    	"pathname", "filename", "author", "title"
+            AudioFile.class,
+            SampledFile.class,
+            TaggedFile.class,
+            WavFile.class,
     };
 
+    /**
+     * Test all classes in array clazzA
+     */
     @Test
     public void testAttributes() {
-        // Teste alle Klassen im Array clazzA
         for (Class theClass : clazzA) {
             try {
-                // Teste alle Attribute
+                // Test all attributes of theClass
                 for (Field field : theClass.getDeclaredFields()) {
                     field.setAccessible(true);
                     String attShort = field.getName();
 
-                    /** 
-                     * Attribute names start with lowercase letters
-                     * Exceptions:
-                     * - synthetic attributes like Enum expansiones
-                     * - constants defined with final modifier
+                    /**
+                     * Attribute names should start with a lowercase letter
+                     * Exceptions
+                     * - synthetic attributes
+                     * - constants (final modifier)
                      */
-                    assertTrue("Attribute "
-                        + attShort
-                        + ": Name of attribute should start with lower case letters",
-                        Character.isLowerCase(attShort.charAt(0))
-                        || field.isSynthetic()
-                        || isFinal(field.getModifiers()));
+                    assertTrue("Attribute " + attShort
+                            + "; name should begin with lowercase letter!",
+                            Character.isLowerCase(attShort.charAt(0))
+                                    || field.isSynthetic()
+                                    || isFinal(field.getModifiers()));
 
                     /**
                      * Attributes should not be public
@@ -50,24 +49,12 @@ public class AttributesTest {
                      * - synthetic attributes
                      */
                     int mod = field.getModifiers();
-                    assertTrue("attribute '" + attShort + "' should not be public!", 
+                    assertTrue("attribute '" + attShort + "' should not be public!",
                             !isPublic(mod) || isStatic(field.getModifiers()));
                 }
             } catch (SecurityException e) {
                 fail(e.toString());
             }
         }
-    }
-    
-    @Test
-    public void testGetters() {
-    	for (String attributeName : attributeNames) {
-    		try {
-    			Field f = AudioFile.class.getDeclaredField(attributeName);
-    			assertEquals("String", f.getType().getSimpleName());
-    		} catch (NoSuchFieldException nsfe) {
-    			fail("Attribute \"" + attributeName + "\" missing!");
-    		}
-    	}
     }
 }

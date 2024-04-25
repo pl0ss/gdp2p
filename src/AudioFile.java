@@ -1,4 +1,13 @@
-public class AudioFile {
+import java.io.File;
+
+public abstract class AudioFile {
+	
+	/*
+	 - Bietet Methoden zum Parsen des Dateinamens der Audiodatei.
+	 - Gibt abstrakte Methoden zur Wiedergabe der Audiodatei, zum Pausieren bzw. Anhalten
+		der Wiedergabe der Audiodatei sowie zur Formatierung der Abspieldauer und Abspielposition vor.
+	 */
+	
 	private String pathname;
 	private String filename;
 	private String author;
@@ -18,10 +27,10 @@ public class AudioFile {
 	
 	
 	public String getPathname() {
-		return pathname;
+		return this.pathname;
 	}
-	private void setPathname(String pathname) {
-		this.pathname = pathname;
+	public void setPathname(String pathname) {
+		parsePathname(pathname);
 	}
 	
 	public String getFilename() {
@@ -51,9 +60,17 @@ public class AudioFile {
 	}
 	
 	
-	public void parsePathname(String path) { // met. nur wegen vorgabe
-		setPathname(parseReturnPathname(path));
-		parseFilename(path); // wegen JUnit test
+	private void parsePathname(String path) {
+		String newPathname = parseReturnPathname(path);
+		// Prüfen, ob Datei lesbar ist
+        File datei = new File(newPathname);
+        if (!datei.canRead()) {
+            throw new RuntimeException("Datei nicht lesbar: " + newPathname);
+        }
+
+        this.pathname = newPathname;
+		
+		parseFilename(path);
 	}
 	private String parseReturnPathname(String path) {
 		return parseReturnPathname(path, isWindows());
@@ -74,11 +91,11 @@ public class AudioFile {
 		
 		// Alle Doppelten / oder \ entfernen
 		{
-			while(newPathname.split("\\\\\\\\").length > 1) {
+			while(newPathname.contains("\\\\\\\\")) {
 				newPathname = newPathname.replaceAll("\\\\\\\\", "\\\\"); // also \\ zu \
 			}
 			
-			while(newPathname.split("//").length > 1) {
+			while(newPathname.contains("//")) {
 				newPathname = newPathname.replaceAll("//", "/");
 			}
 		}
@@ -209,6 +226,14 @@ public class AudioFile {
 		
 		return this.author + " - " + this.title;
 	}
+	
+	
+	abstract public void play();
+	abstract public void togglePause();
+	abstract public void stop();
+	abstract public String formatDuration();
+	abstract public String formatPosition();
+	
 	
 	public static void main(String[] args) {
 

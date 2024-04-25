@@ -1,370 +1,134 @@
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import org.junit.After;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.Hashtable;
+
 import org.junit.Before;
 import org.junit.Test;
 
 public class AudioFileTest {
+	@SuppressWarnings("rawtypes")
+	private Class clazz = AudioFile.class;
+	private char sepchar = System.getProperty("file.separator").charAt(0);;
+	private AudioFile f1;
+	private AudioFile f2;
+	private AudioFile f3;
 
-    private static char sep;
-
-    private static String root = "/";
-
-    private static String pathNames[];
-
-    private static String expectedPathNames[];
-
-    private static String expectedFileNames[];
-
-    private static String expectedAuthors[];
-
-    private static String expectedTitles[];
-
-    private static String expectedToStrings[];
-
-    @Before
-    public void setUp() {
-		// to test Windows or Linux just use the corresponding lines in comments below
-		// Windows: uncomment the next line
-		sep = Utils.emulateWindows();
-		// Linux: uncomment the next line
-		//sep = Utils.emulateLinux();
-
-        String osname = System.getProperty("os.name");
-        if (osname.toLowerCase().indexOf("win") >= 0)
-            root = "C:" + sep;
-
-        // This array contains the arguments we feed to test method parsePathname()
-        pathNames = new String[] {
-                "home" + sep + "meier" + sep + "Musik" + sep + "Falco - Rock Me Amadeus.mp3",
-                "home" + sep + "db-admin" + sep + "Frankie Goes To Hollywood - The Power Of Love.ogg",
-                root + "tmp" + sep + "Deep Purple - Smoke On The Water.wav",
-                root + "my-tmp" + sep + "file.mp3",
-                "Falco - Rock Me Amadeus.mp3",
-                "file.mp3",
-                ".." + sep + "music" + sep + "audiofile.au",
-                "   A.U.T.O.R   -   T.I.T.E.L   .EXTENSION",
-                "Hans-Georg Sonstwas - Blue-eyed boy-friend.mp3",
-                "",
-                " ",
-                "//your-tmp/part1//file.mp3/",
-                "../your-tmp/..//part1//file.mp3/",
-                "\\file.mp3",
-                "\\part1\\\\file.mp3\\",
-                "\\part1///file.mp3",
-                "/MP3-Archiv/.nox",
-                "/MP3-Archiv/Falco - Rock me Amadeus.",
-                "-",
-                " -  "
-        };
-
-        // Array of the results expected from method getPathname() 
-        // We expect normalization with respect to consecutive occurrences of / and \
-        // and replacement by a single System.getProperty("file.separator").charAt(0)
-        expectedPathNames = new String[] {
-                "home" + sep + "meier" + sep + "Musik" + sep + "Falco - Rock Me Amadeus.mp3",
-                "home" + sep + "db-admin" + sep + "Frankie Goes To Hollywood - The Power Of Love.ogg",
-                root + "tmp" + sep + "Deep Purple - Smoke On The Water.wav",
-                root + "my-tmp" + sep + "file.mp3",
-                "Falco - Rock Me Amadeus.mp3",
-                "file.mp3",
-                ".." + sep + "music" + sep + "audiofile.au",
-                "A.U.T.O.R   -   T.I.T.E.L   .EXTENSION",
-                "Hans-Georg Sonstwas - Blue-eyed boy-friend.mp3",
-                "",
-                "",
-                sep + "your-tmp" + sep + "part1" + sep + "file.mp3" + sep,
-                ".." + sep + "your-tmp" + sep + ".." + sep + "part1" + sep + "file.mp3" + sep,
-                sep + "file.mp3",
-                sep + "part1" + sep + "file.mp3" + sep,
-                sep + "part1" + sep + "file.mp3",
-                sep + "MP3-Archiv" + sep + ".nox",
-                sep + "MP3-Archiv" + sep + "Falco - Rock me Amadeus.",
-                "-",
-                "-"
-        };
-
-        // Array of the results expected from method getFilename() 
-        expectedFileNames = new String[] {
-                "Falco - Rock Me Amadeus.mp3",
-                "Frankie Goes To Hollywood - The Power Of Love.ogg",
-                "Deep Purple - Smoke On The Water.wav",
-                "file.mp3",
-                "Falco - Rock Me Amadeus.mp3",
-                "file.mp3",
-                "audiofile.au",
-                "A.U.T.O.R   -   T.I.T.E.L   .EXTENSION",
-                "Hans-Georg Sonstwas - Blue-eyed boy-friend.mp3",
-                // Some more ugly test cases
-                "",
-                "",
-                "",
-                "",
-                "file.mp3",
-                "",
-                "file.mp3",
-                ".nox",
-                "Falco - Rock me Amadeus.",
-                "-",
-                "-"
-        };
-
-        // Array of the results expected from method getAuthor() 
-        // Leading and trailing spaces and tabs (white space) are trimmed.
-        expectedAuthors = new String[] {
-                "Falco",
-                "Frankie Goes To Hollywood",
-                "Deep Purple",
-                "",
-                "Falco",
-                "",
-                "",
-                "A.U.T.O.R",
-                "Hans-Georg Sonstwas",
-                // Some more ugly test cases
-                "", 
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "Falco",
-                "",
-                ""
-        };
-
-        // Array of the results expected from method getTitle() 
-        // Leading and trailing spaces and tabs (white space) are trimmed.
-        expectedTitles = new String[] {
-                "Rock Me Amadeus",
-                "The Power Of Love",
-                "Smoke On The Water",
-                "file",
-                "Rock Me Amadeus",
-                "file",
-                "audiofile",
-                "T.I.T.E.L",
-                "Blue-eyed boy-friend",
-                // Some more ugly test cases
-                "",
-                "",
-                "",
-                "",
-                "file",
-                "",
-                "file",
-                "",
-                "Rock me Amadeus",
-                "-",
-                "-"
-        };
-
-        // Array of the results expected from method toString() 
-        expectedToStrings = new String[] {
-                "Falco - Rock Me Amadeus",
-                "Frankie Goes To Hollywood - The Power Of Love",
-                "Deep Purple - Smoke On The Water",
-                "file",
-                "Falco - Rock Me Amadeus",
-                "file",
-                "audiofile",
-                "A.U.T.O.R - T.I.T.E.L",
-                "Hans-Georg Sonstwas - Blue-eyed boy-friend",
-                // Some more ugly test cases
-                "",
-                "",
-                "",
-                "",
-                "file",
-                "",
-                "file",
-                "",
-                "Falco - Rock me Amadeus",
-                "-",
-                "-"
-        };
-    }
-
-	@After
-	public void tearDown() {
-		Utils.resetEmulation();
+	@Before
+	public void setup() {
+		// Initializer block
+		// This checks the proper connection of constructors already
+		f1 = new WavFile("audiofiles/wellenmeister - tranquility.wav");
+		f2 = new TaggedFile("audiofiles/Rock 812.mp3");
+		f3 = new TaggedFile("audiofiles/wellenmeister_awakening.ogg");
 	}
-    
-    /**
-     *  Use the constructor without arguments
-     */
-    @Test
-    public void testSettersAndGetters() {
-        String current = null;
-        try {
-            for (int i = 0; i < pathNames.length; i++) {
-                String p = pathNames[i];
-                current = p;
 
-                System.out.printf("testSettersAndGetters: pathname='%s'\nexpected:\n\tpathname='%s'\n\tfilename='%s'\n\tauthor='%s'\n\ttitle='%s'\n\ttoString='%s'\n",
-                		p, expectedPathNames[i], expectedFileNames[i], expectedAuthors[i], expectedTitles[i], expectedToStrings[i]);
-                AudioFile af = new AudioFile();
-                af.parsePathname(p);
-                af.parseFilename(af.getFilename());
+	@Test
+	public void testGetPathname() {
+		assertEquals("Pathname not correct", "audiofiles" + sepchar + "wellenmeister - tranquility.wav",
+				f1.getPathname());
+		assertEquals("Pathname not correct", "audiofiles" + sepchar + "Rock 812.mp3", f2.getPathname()); // ***
+		assertEquals("Pathname not correct", "audiofiles" + sepchar + "wellenmeister_awakening.ogg", f3.getPathname());
+	}
 
-                assertEquals("getPathname() for test case [" + i + "]: " + p
-                        + " not correct", expectedPathNames[i],
-                        af.getPathname());
-                assertEquals("getFilename() for test case [" + i + "]: " + p
-                        + " not correct", expectedFileNames[i],
-                        af.getFilename());
-                assertEquals("getAuthor() for test case [" + i + "]: " + p
-                        + " not correct", expectedAuthors[i], af.getAuthor());
-                assertEquals("getTitle() for test case [" + i + "]: " + p
-                        + " not correct", expectedTitles[i], af.getTitle());
-                assertEquals("toString() for test case [" + i + "]: " + p
-                        + " not correct", expectedToStrings[i], af.toString());
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail("Error for pathname:" + current + ":" + e);
-        }
-    }
+	@Test
+	public void testGetFilename() {
+		assertEquals("Filename not correct", "wellenmeister - tranquility.wav", f1.getFilename());
+		assertEquals("Filename not correct", "Rock 812.mp3", f2.getFilename()); // ***
+		assertEquals("Filename not correct", "wellenmeister_awakening.ogg", f3.getFilename());
+	}
 
-    /**
-     *  Perform the same getter and setter tests by using the CTOR with one
-     *  argument for construction
-     */
-    @Test
-    public void testCtor() {
-        String current = null;
-        try {
-            for (int i = 0; i < pathNames.length; i++) {
-                String p = pathNames[i];
-                current = p;
+	@Test
+	public void testGetAuthor() {
+		assertEquals("Author not correct", "wellenmeister", f1.getAuthor());
+		assertEquals("Author not correct", "Eisbach", f2.getAuthor()); // ***
+		assertEquals("Author not correct", "Wellenmeister", f3.getAuthor());
+	}
 
-                System.out.printf("testCtor: pathname='%s'\nexpected:\n\tpathname='%s'\n\tfilename='%s'\n\tauthor='%s'\n\ttitle='%s'\n\ttoString='%s'\n",
-                		p, expectedPathNames[i], expectedFileNames[i], expectedAuthors[i], expectedTitles[i], expectedToStrings[i]);
-                AudioFile af = new AudioFile(p);
-                assertEquals("getPathname() for test case [" + i + "]: " + p
-                        + " not correct", expectedPathNames[i],
-                        af.getPathname());
-                assertEquals("getFilename() for test case [" + i + "]: " + p
-                        + " not correct", expectedFileNames[i],
-                        af.getFilename());
-                assertEquals("getAuthor() for test case [" + i + "]: " + p
-                        + " not correct", expectedAuthors[i], af.getAuthor());
-                assertEquals("getTitle() for test case [" + i + "]: " + p
-                        + " not correct", expectedTitles[i], af.getTitle());
-                assertEquals("toString() for test case [" + i + "]: " + p
-                        + " not correct", expectedToStrings[i], af.toString());
-            }
-        } catch (Exception e) {
-        	e.printStackTrace();
-            fail("Error for pathname:" + current + ":" + e);
-        }
-    }
+	@Test
+	public void testGetTitle() {
+		assertEquals("Author not correct", "tranquility", f1.getTitle());
+		assertEquals("Author not correct", "Rock 812", f2.getTitle()); // ***
+		assertEquals("Author not correct", "TANOM Part I: Awakening", f3.getTitle());
+	}
 
-    /**
-     *  A test case for the treatment of drive letters.
-     *  If a drive specifier (a single letter followed by :)
-     *  is provided it is to be replaced according to the platform.
-     *  On windows:        d: --> d:  (no transformation of drive specifier)
-     *  On other platform: d: --> /d/ or more precisely sep + "d" + sep
-     */
-    @Test
-    public void test_TreatmentOfDriveLetters_01() {
-        AudioFile af = new AudioFile();
-        af.parsePathname("Z:\\part1\\\\file.mp3\\");
+	// Test the toString implementations of concrete classes TaggedFile and
+	// WavFile
+	@Test
+	public void testToString() {
+		assertEquals("toString not correct", "wellenmeister - tranquility - 02:21", f1.toString());
+		assertEquals("toString not correct", "Eisbach - Rock 812 - The Sea, the Sky - 05:31", f2.toString()); // ***
+		assertEquals("toString not correct",
+				"Wellenmeister - TANOM Part I: Awakening - TheAbsoluteNecessityOfMeaning - 05:55", f3.toString());
+	}
 
-        char sep = System.getProperty("file.separator").charAt(0);
+	@Test
+	public void testNonExisting() {
+		// Creating an AudioFile object for a non-existing file should raise
+		// exception
+		try {
+			new WavFile("does not exist.wav");
+			fail("Expecting exception due to a non-existing file");
+		} catch (RuntimeException e) {
+			// Expected
+		}
+		try {
+			new TaggedFile("does not exist.mp3");
+			fail("Expecting exception due to a non-existing file");
+		} catch (RuntimeException e) {
+			// Expected
+		}
+	}
 
-        if (isWindows()) {
-            // On Windows we expect "Z:\part1\file.mp3\"
-            assertEquals("Pathname stored incorrectly",
-                    "Z:" + sep + "part1" + sep + "file.mp3" + sep,
-                    af.getPathname());
-        } else {
-            // On other platforms we expect "/Z/part1/file.mp3/" 
-            assertEquals("Pathname stored incorrectly",
-                    sep + "Z" + sep + "part1" + sep + "file.mp3" + sep,
-                    af.getPathname());
-        }
-        assertEquals("Returned filename is incorrect", "", af.getFilename());
-    }
+	@Test
+	public void testAbstract() {
+		int mod = clazz.getModifiers();
+		assertTrue("Class AudioFile is not declared abstract", Modifier.isAbstract(mod));
+	}
 
-    /**
-     * A test case for the treatment of drive letters
-     */
-    @Test
-    public void test_TreatmentOfDriveLetters_02() {
-        AudioFile af = new AudioFile();
-        af.parsePathname("Z:///part1//file.mp3");
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testAbstractMethods() {
+		Hashtable<String, String> hm = new Hashtable<String, String>();
+		hm.put("play", "void");
+		hm.put("togglePause", "void");
+		hm.put("stop", "void");
+		hm.put("formatDuration", "java.lang.String");
+		hm.put("formatPosition", "java.lang.String");
+		String goneWrong = null;
+		try {
+			for (String methName : hm.keySet()) {
+				goneWrong = methName;
+				Method meth = clazz.getDeclaredMethod(methName, (Class[]) null);
+				assertEquals("Wrong return type for " + methName, meth.getReturnType().getName(), hm.get(methName));
+				int mod = meth.getModifiers();
+				assertTrue("AudioFile." + methName + " is not declared abstract", Modifier.isAbstract(mod));
+			}
+		} catch (SecurityException e) {
+			fail(e.toString());
+		} catch (NoSuchMethodException e) {
+			fail("Method " + goneWrong + " does not exist");
+		}
+	}
 
-        char sep = System.getProperty("file.separator").charAt(0);
-
-        if (isWindows()) {
-            // On Windows we expect "Z:\part1\file.mp3"
-            assertEquals("Pathname stored incorrectly", 
-                    "Z:" + sep + "part1" + sep + "file.mp3",
-                    af.getPathname());
-        } else {
-            // On other platforms we expect "/Z/part1/file.mp3/" 
-            assertEquals("Pathname stored incorrectly",
-                    sep + "Z" + sep + "part1" + sep + "file.mp3",
-                    af.getPathname());
-        }
-        assertEquals("Returned filename is incorrect", "file.mp3", af.getFilename());
-    }
-
-    /**
-     * A test case for the treatment of drive letters
-     */
-    @Test
-    public void test_TreatmentOfDriveLetters_03() {
-        AudioFile af = new AudioFile();
-        af.parsePathname("Z:///file.mp3");
-
-        char sep = System.getProperty("file.separator").charAt(0);
-
-        if (isWindows()) {
-            // On Windows we expect "Z:\file.mp3"
-            assertEquals("Pathname stored incorrectly", 
-                    "Z:" + sep + "file.mp3",
-                    af.getPathname());
-        } else {
-            // On other platforms we expect "/Z/file.mp3" 
-            assertEquals("Pathname stored incorrectly",
-                    sep + "Z" + sep + "file.mp3",
-                    af.getPathname());
-        }
-        assertEquals("Returned filename is incorrect", "file.mp3", af.getFilename());
-    }
- 
-    @Test
-    public void test_parsePathname_xy1() throws Exception {
-        AudioFile af = new AudioFile();
-        af.parsePathname("/part1/mymusic/ -");
-        char sepchar = System.getProperty("file.separator").charAt(0);
-        assertEquals("Pathname stored incorrectly", sepchar + "part1" + sepchar +
-                    "mymusic" + sepchar + " -", af.getPathname());
-        assertEquals("Returned filename is incorrect", "-", af.getFilename());
-    }
-    
-    @Test
-    public void test_parsePathname_xy2() throws Exception {
-        AudioFile af = new AudioFile();
-        af.parsePathname("\\nocheinsong\\- ");
-        char sepchar = System.getProperty("file.separator").charAt(0);
-        assertEquals("Pathname stored incorrectly", sepchar  +"nocheinsong" +
-                    sepchar + "-", af.getPathname());
-        assertEquals("Returned filename is incorrect", "-", af.getFilename());
-    }
-
-
-    /*
-     * Auxiliary methods 
-     */
-
-    private boolean isWindows() {
-        return System.getProperty("os.name").toLowerCase().indexOf("win") >= 0;
-    }
+	@Test
+	public void testNullTags() {
+		AudioFile f = null;
+		// The file "audiofiles/kein.wav.sondern.ogg" does not contain tags for author
+		// and title
+		// We expect that title is derived from filename!
+		try {
+			f = new TaggedFile("audiofiles/kein.wav.sondern.ogg");
+		} catch (NullPointerException e) {
+			fail("NullPointerException for TaggedFile with null tags");
+		} catch (RuntimeException e) {
+			fail("File does not exist " + e);
+		}
+		assertEquals("Wrong author", "", f.getAuthor());
+		assertEquals("Wrong title", "kein.wav.sondern", f.getTitle());
+	}
 }
