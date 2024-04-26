@@ -177,7 +177,7 @@ public abstract class AudioFile {
 	
 	private String parseReturnAuthor(String path) {
 		String author = parseReturnFilename(path);
-		if(author.split(" - ").length > 1) {
+		if(author.contains(" - ")) {
 			author = author.split(" - ")[0];
 		} else { // wenn filename kein " - " enthält
 			return "";
@@ -200,7 +200,7 @@ public abstract class AudioFile {
 		
 		String title = parseReturnFilename(path);
 		
-		if(title.split(" - ").length > 1) {
+		if(title.contains(" - ")) {
 			title = title.split(" - ")[1];
 		}
 		

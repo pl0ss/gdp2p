@@ -58,17 +58,17 @@ public abstract class SampledFile extends AudioFile {
 		}
 	}
 	
-	public String formatDuration() { // zB 01:02
+	public String formatDuration() {
 		long duration = getDuration();
 		return microSec2time(duration, true);
 	}
 	
-	public String formatPosition() { // zB 01:02
+	public String formatPosition() {
 		long pos = studiplayer.basic.BasicPlayer.getPosition();
 		return microSec2time(pos, true);
 	}
 	
-	public static String timeFormatter(long timeInMicroSeconds) { // zB 01:02
+	public static String timeFormatter(long timeInMicroSeconds) {
 		return microSec2time(timeInMicroSeconds, true);
 	}
 	
@@ -79,6 +79,11 @@ public abstract class SampledFile extends AudioFile {
 	public void setDuration(long duration) {
 		this.duration = duration;
 	}
+	
+	public String toString() {
+		return super.toString();
+	}
+	
 	
 	public static void main(String[] args) {
 
