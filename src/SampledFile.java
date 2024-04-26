@@ -29,12 +29,25 @@ public abstract class SampledFile extends AudioFile {
 		studiplayer.basic.BasicPlayer.stop();
 	}
 	
+	public static String microSec2time(long timeInMicroSeconds) {
+		return microSec2time(timeInMicroSeconds, false);
+	}
+	public static String microSec2time(long timeInMicroSeconds, boolean minZweistellig) {
+		if(timeInMicroSeconds < 0) {
+			throw new RuntimeException("microSec2time: time negativ" + timeInMicroSeconds);
+		}
+		long sec = timeInMicroSeconds / 1_000_000;
+		return sec2time(sec, minZweistellig);
+	}
 	public static String sec2time(long sec) {
 		return sec2time(sec, false);
 	}
 	public static String sec2time(long sec, boolean minZweistellig) {
 		if(sec < 0) {
 			throw new RuntimeException("sec2time: time negativ" + sec);
+		}
+		if(sec >= 100 * 60) {
+			throw new RuntimeException("sec2time: time to high" + sec);
 		}
 		long min = sec / 60;
 		long sec_rest = sec % 60;
@@ -46,19 +59,17 @@ public abstract class SampledFile extends AudioFile {
 	}
 	
 	public String formatDuration() { // zB 01:02
-		long duration = getDuration() / 1_000_000;
-		return sec2time(duration, true);
+		long duration = getDuration();
+		return microSec2time(duration, true);
 	}
 	
 	public String formatPosition() { // zB 01:02
 		long pos = studiplayer.basic.BasicPlayer.getPosition();
-		long sec = pos / 1_000_000;
-		return sec2time(sec, true);
+		return microSec2time(pos, true);
 	}
 	
 	public static String timeFormatter(long timeInMicroSeconds) { // zB 01:02
-		long sec = timeInMicroSeconds / 1_000_000;
-		return sec2time(sec, true);
+		return microSec2time(timeInMicroSeconds, true);
 	}
 	
 	public long getDuration() {
