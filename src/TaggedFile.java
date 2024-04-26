@@ -1,5 +1,3 @@
-// import java.util.ArrayList;
-// import java.util.List;
 import java.util.Map;
 
 import studiplayer.basic.TagReader;
@@ -48,19 +46,4 @@ public class TaggedFile extends SampledFile {
 		
 		return super.toString() + " - " + album_str + formatDuration();
 	}
-	
-	// Alternative Lösung
-//	public String toString() {
-//		String album = getAlbum();
-//		
-//		List<String> res = new ArrayList<>();
-//		
-//		res.add(super.toString());
-//		if(album != null) {
-//			res.add(album);
-//		}
-//		res.add(formatDuration());
-//		
-//		return String.join(" - ", res);
-//	}
 }
