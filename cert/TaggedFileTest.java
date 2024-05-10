@@ -2,8 +2,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.util.Arrays;
-
+import org.junit.Before;
 import org.junit.Test;
 
 public class TaggedFileTest {
@@ -12,16 +11,22 @@ public class TaggedFileTest {
     private TaggedFile f1;
     private TaggedFile f2;
     private TaggedFile f3;
+    private TaggedFile f4;
+    private TaggedFile f5;
 
-    { // Initializer block
-      // This checks the proper connection of constructors already
+    @Before
+    public void setup() { 
+    	// Initializer block
+    	// This checks the proper connection of constructors already
 
         try {
             f1 = new TaggedFile("audiofiles/Rock 812.mp3");
             f2 = new TaggedFile("audiofiles/wellenmeister_awakening.ogg");
-            f3 = new TaggedFile("audiofiles/beethoven-ohne-album.mp3");
+            f3 = new TaggedFile("audiofiles/Haydn - Symphonie # 96 Motiv.ogg");
+            f4 = new TaggedFile("audiofiles/Motiv 5. Symphonie von Beethoven.ogg");
+            f5 = new TaggedFile("audiofiles/Mozart - Piano Concerto No25 Motiv.ogg");
         } catch (Exception e) {
-            e.printStackTrace();
+        	fail("Problem creating AudioFile objects: " + e.getMessage());
         }
     }
 
@@ -55,8 +60,16 @@ public class TaggedFileTest {
                 f2.toString());
         assertEquals(
                 "toString not correct",
-                "beethoven-ohne-album - 00:06",
+                "Haydn - Symphonie # 96 Motiv - Musikschnipsel - 00:03",
                 f3.toString());
+        assertEquals(
+                "toString not correct",
+                "Motiv 5. Symphonie von Beethoven - Musikschnipsel - 00:06",
+                f4.toString());
+        assertEquals(
+                "toString not correct",
+                "Mozart - Piano Concerto No25 Motiv - Musikschnipsel - 00:15",
+                f5.toString());
     }
 
     @Test
