@@ -1,3 +1,6 @@
+package studioplayer.audio;
+
+
 import java.util.Arrays;
 
 public class AudioFileFactory {

@@ -1,3 +1,6 @@
+package studioplayer.audio;
+
+
 import java.io.File;
 
 public abstract class AudioFile {

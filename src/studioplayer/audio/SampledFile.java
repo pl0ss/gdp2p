@@ -1,3 +1,5 @@
+package studioplayer.audio;
+
 
 public abstract class SampledFile extends AudioFile {
 	
