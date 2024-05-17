@@ -1,11 +1,11 @@
-package studioplayer.audio;
+package studiplayer.audio;
 
 
 import java.util.Arrays;
 
 public class AudioFileFactory {
 	
-	public static AudioFile createAudioFile(String path) {
+	public static AudioFile createAudioFile(String path) throws NotPlayableException {
 		if(path == null) {
 			return null;
 		}
@@ -23,6 +23,7 @@ public class AudioFileFactory {
 			return new TaggedFile(path);
 		}
 		
-		throw new RuntimeException("Unknown suffix for AudioFile \"" + path + "\"");
+		throw new NotPlayableException(path, "Unknown suffix for AudioFile \"" + path + "\"");
 	}
+	
 }

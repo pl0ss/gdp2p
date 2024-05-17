@@ -1,4 +1,4 @@
-package studioplayer.audio;
+package studiplayer.audio;
 
 
 public abstract class SampledFile extends AudioFile {
@@ -10,17 +10,22 @@ public abstract class SampledFile extends AudioFile {
 	protected long duration = 0;
 	
 
-	SampledFile() {
+	SampledFile() throws NotPlayableException {
 		
 	}
 	
-	SampledFile(String path) {
+	SampledFile(String path) throws NotPlayableException {
 		super(path);
 	}
 	
 	
-	public void play() {
-		studiplayer.basic.BasicPlayer.play(getPathname());
+	public void play() throws NotPlayableException {
+		try {
+			studiplayer.basic.BasicPlayer.play(getPathname());
+		} catch (Exception e) {
+			throw new NotPlayableException("Datei nicht lesbar: " + getPathname(), getPathname());
+		}
+
 	}
 	
 	public void togglePause() {

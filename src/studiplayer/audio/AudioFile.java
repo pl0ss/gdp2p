@@ -1,4 +1,4 @@
-package studioplayer.audio;
+package studiplayer.audio;
 
 
 import java.io.File;
@@ -17,14 +17,14 @@ public abstract class AudioFile {
 	private String title;
 
 	
-	AudioFile() {
+	AudioFile() throws NotPlayableException {
 		this.pathname = "";
 		this.filename = "";
 		this.author = "";
 		this.title = "";
 	}
 	
-	AudioFile(String path) {
+	AudioFile(String path) throws NotPlayableException {
 		this();
 		parsePathname(path);
 	}
@@ -33,7 +33,7 @@ public abstract class AudioFile {
 	public String getPathname() {
 		return this.pathname;
 	}
-	public void setPathname(String pathname) {
+	public void setPathname(String pathname) throws NotPlayableException {
 		parsePathname(pathname);
 	}
 	
@@ -64,12 +64,16 @@ public abstract class AudioFile {
 	}
 	
 	
-	private void parsePathname(String path) {
+	public void parsePathname(String path) throws NotPlayableException {
 		String newPathname = parseReturnPathname(path);
 		// Prüfen, ob Datei lesbar ist
         File datei = new File(newPathname);
+        // if (!datei.canRead()) {
+        //     throw new RuntimeException("Datei nicht lesbar: " + newPathname);
+        // }
+
         if (!datei.canRead()) {
-            throw new RuntimeException("Datei nicht lesbar: " + newPathname);
+            throw new NotPlayableException(newPathname, "Datei nicht lesbar: " + newPathname);
         }
 
         this.pathname = newPathname;
@@ -110,7 +114,7 @@ public abstract class AudioFile {
 		// wenn newPathname kein / enthält, dann trim
 			// nicht trim: "  /my-tmp/file.mp3"
 			// trim "  A.U.T.O.R   -   T.I.T.E.L   .EXTENSION"
-		if(newPathname.split("/").length == 1) {
+		if(newPathname.contains("/")) {
 			newPathname = newPathname.trim();
 		}
 		
@@ -232,7 +236,7 @@ public abstract class AudioFile {
 	}
 	
 	
-	abstract public void play();
+	abstract public void play() throws NotPlayableException;
 	abstract public void togglePause();
 	abstract public void stop();
 	abstract public String formatDuration();

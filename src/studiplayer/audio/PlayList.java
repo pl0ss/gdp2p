@@ -1,4 +1,4 @@
-package studioplayer.audio;
+package studiplayer.audio;
 
 
 import java.io.File;
@@ -30,7 +30,7 @@ public class PlayList {
 		current = 0;
 	}
 	
-	public PlayList(String m3uPathname) {
+	public PlayList(String m3uPathname) throws NotPlayableException {
 		this();
 		loadFromM3U(m3uPathname);
 	}
@@ -67,7 +67,6 @@ public class PlayList {
 	}
 	
 	public void loadFromM3U(String pathname) {
-		
 		// neu initialisieren
 		current = 0;
 		while(audioFileList.size() > 0) {
@@ -76,32 +75,37 @@ public class PlayList {
 		
 		
 		// code aus vorlesung
-//		File file = new File(pathname);
-//		Scanner scanner = null;
-//		try {
-//			scanner = new Scanner(file);
-//			while(scanner.hasNextLine()) {
-//				String line = scanner.nextLine();
-//				// ...
-//				System.out.println(line);
-//			}
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		} finally { // wird immer ausgeführt
-//			scanner.close();
-//		}
+		//		File file = new File(pathname);
+		//		Scanner scanner = null;
+		//		try {
+		//			scanner = new Scanner(file);
+		//			while(scanner.hasNextLine()) {
+		//				String line = scanner.nextLine();
+		//				// ...
+		//				System.out.println(line);
+		//			}
+		//		} catch (Exception e) {
+		//			e.printStackTrace();
+		//		} finally { // wird immer ausgeführt
+		//			scanner.close();
+		//		}
 		
+
 		List<String> data = readFile(pathname);
 		
 		for(int i = 0; i < data.size(); i++) {
 			String line = data.get(i);
 			String path = line.substring(5);
+
 			if(!path.trim().equals("") && !path.substring(0, 1).equals("#")) {
-				audioFileList.add(AudioFileFactory.createAudioFile(path));
+				try {
+					audioFileList.add(AudioFileFactory.createAudioFile(path));
+				} catch (Exception e) {
+					System.out.println(e + " Diese Datei Existiert nicht: " + path );
+					// throw new Exception("Datei nicht lesbar: " + pathname);
+				}
 			}
 		}
-		
-		System.out.println(audioFileList.size());
 	}
 	
 	public void saveAsM3U(String pathname) {
