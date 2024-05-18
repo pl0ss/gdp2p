@@ -17,7 +17,7 @@ public abstract class AudioFile {
 	private String title;
 
 	
-	AudioFile() throws NotPlayableException {
+	AudioFile() {
 		this.pathname = "";
 		this.filename = "";
 		this.author = "";

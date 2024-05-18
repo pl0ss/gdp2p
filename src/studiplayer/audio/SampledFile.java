@@ -10,7 +10,7 @@ public abstract class SampledFile extends AudioFile {
 	protected long duration = 0;
 	
 
-	SampledFile() throws NotPlayableException {
+	SampledFile() {
 		
 	}
 	
@@ -23,7 +23,7 @@ public abstract class SampledFile extends AudioFile {
 		try {
 			studiplayer.basic.BasicPlayer.play(getPathname());
 		} catch (Exception e) {
-			throw new NotPlayableException("Datei nicht lesbar: " + getPathname(), getPathname());
+			throw new NotPlayableException(getPathname(), e);
 		}
 
 	}

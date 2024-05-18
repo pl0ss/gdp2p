@@ -14,7 +14,7 @@ public class TaggedFile extends SampledFile {
 	private String album;
 
 	
-	public TaggedFile() throws NotPlayableException {
+	public TaggedFile() {
 		
 	}
 	
@@ -51,7 +51,7 @@ public class TaggedFile extends SampledFile {
 			long duration = (long) tagMap.get("duration");
 			super.duration = duration;
 		} catch (Exception e) {
-			throw new NotPlayableException("Datei nicht lesbar: " + getPathname(), getPathname());
+			throw new NotPlayableException(getPathname(), e);
 		}
 	}
 	

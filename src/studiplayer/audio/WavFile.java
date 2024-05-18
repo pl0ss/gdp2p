@@ -9,7 +9,7 @@ public class WavFile extends SampledFile {
 	 - Liest Dateieigenschaften aus der Metainformation der Audiodatei.
 	 */
 
-	public WavFile() throws NotPlayableException {
+	public WavFile() {
 		
 	}
 	
@@ -27,7 +27,7 @@ public class WavFile extends SampledFile {
 			
 			setDuration(computeDuration(numberOfFrames, frameRate));
 		} catch (Exception e) {
-			throw new NotPlayableException("Datei nicht lesbar: " + getPathname(), getPathname());
+			throw new NotPlayableException(getPathname(), e);
 		}
 	}
 	
