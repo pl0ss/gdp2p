@@ -16,15 +16,16 @@ public abstract class AudioFile {
 	private String author;
 	private String title;
 
+
 	
-	AudioFile() {
+    public AudioFile() {
 		this.pathname = "";
 		this.filename = "";
 		this.author = "";
 		this.title = "";
 	}
 	
-	AudioFile(String path) throws NotPlayableException {
+	public AudioFile(String path) throws NotPlayableException {
 		this();
 		parsePathname(path);
 	}

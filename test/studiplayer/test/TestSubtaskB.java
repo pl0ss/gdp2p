@@ -89,7 +89,7 @@ public class TestSubtaskB {
     }
 
     @Test
-    public void testPlayListCanReadParts() throws IOException, NotPlayableException {
+    public void testPlayListCanReadParts() throws IOException {
         File file = File.createTempFile("test", "m3u");
         try (FileWriter writer = new FileWriter(file)) {
             writer.write(new StringBuilder()
@@ -104,7 +104,6 @@ public class TestSubtaskB {
         try {
             pl.loadFromM3U(file.getAbsolutePath());
         } catch (Throwable t) {
-        	System.out.println(t);
             fail("We should not get an exception");
         }
         assertEquals(2, pl.size());
