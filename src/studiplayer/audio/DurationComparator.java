@@ -15,7 +15,6 @@ public class DurationComparator implements Comparator<AudioFile> {
 			d2 = ((SampledFile) a2).getDuration();
 		}
 		
-		System.out.println(d1 + " " + d2);
 		return d1.compareTo(d2);
 	}
 

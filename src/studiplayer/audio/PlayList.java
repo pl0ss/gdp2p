@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
@@ -20,11 +21,12 @@ import java.util.Scanner;
 //- Speichern der Liste im M3U-Format
 
 
-public class PlayList {
+public class PlayList implements Iterable<AudioFile> {
 	
-	private LinkedList<AudioFile> audioFileList = new LinkedList<AudioFile>();
+	private LinkedList<AudioFile> files = new LinkedList<AudioFile>();
 	private int current; // Position in der Abspielliste
-	
+	private String search;
+	private SortCriterion sortCriterion = SortCriterion.DEFAULT;
 
 	public PlayList() {
 		current = 0;
@@ -36,60 +38,91 @@ public class PlayList {
 	}
 	
 	
+	public void setSearch(String search) {
+		this.search = search;
+		
+		if(search != null & search != "") {
+			
+			for(int i = 0; i < files.size(); i++) {
+				AudioFile a = files.get(i);
+				
+				String autor = a.getAuthor();
+				if(autor.contains(search)) {
+					i++;
+					continue;
+				}
+				
+				String title = a.getTitle();
+				if(title.contains(search)) {
+					i++;
+					continue;
+				}
+				
+				String album = "";
+				if(a instanceof TaggedFile) {
+					album = ((TaggedFile) a).getAlbum();
+					if(album.contains(search)) {
+						i++;
+						continue;
+					}
+				}
+				
+				files.remove(i);
+			}
+			
+		}
+	}
+	public String getSearch() {
+		return search;
+	}
+	
+	public void setSortCriterion(SortCriterion sortCriterion) {
+		this.sortCriterion = sortCriterion;
+	}
+    
+	
+	public SortCriterion getSortCriterion() {
+		return sortCriterion;
+	}
+	
+	
 	
 	public void add(AudioFile file) {
-		audioFileList.add(file);
+		files.add(file);
 	}
 	
 	public void remove(AudioFile file) {
-		audioFileList.remove(file);
+		files.remove(file);
 	}
 	
 	public int size() {
-		return audioFileList.size();
+		return files.size();
 	}
 	
 	public AudioFile currentAudioFile() {
-		if(audioFileList.size() == 0) {
+		if(files.size() == 0) {
 			return null;
 		}
 		
-		return this.audioFileList.get(current);
+		return this.files.get(current);
 	}
 	
 	public void nextSong() {
-		if(current > (audioFileList.size() -1)) {
+		if(current > (files.size() -1)) {
 			// wenn Index auf einer ungültigen Position steht, dann 0
 			current = 0;
 		} else {
-			current = (current +1) % (audioFileList.size());	
+			current = (current +1) % (files.size());	
 		}
 	}
 	
 	public void loadFromM3U(String pathname) {
 		// neu initialisieren
 		current = 0;
-		while(audioFileList.size() > 0) {
-			audioFileList.remove(0);
+		while(files.size() > 0) {
+			files.remove(0);
 		}
-		
-		
-		// code aus vorlesung
-		//		File file = new File(pathname);
-		//		Scanner scanner = null;
-		//		try {
-		//			scanner = new Scanner(file);
-		//			while(scanner.hasNextLine()) {
-		//				String line = scanner.nextLine();
-		//				// ...
-		//				System.out.println(line);
-		//			}
-		//		} catch (Exception e) {
-		//			e.printStackTrace();
-		//		} finally { // wird immer ausgeführt
-		//			scanner.close();
-		//		}
-		
+
 
 		List<String> data = readFile(pathname);
 		
@@ -99,7 +132,7 @@ public class PlayList {
 
 			if(!path.trim().equals("") && !path.substring(0, 1).equals("#")) {
 				try {
-					audioFileList.add(AudioFileFactory.createAudioFile(path));
+					files.add(AudioFileFactory.createAudioFile(path));
 				} catch (Exception e) {
 					System.out.println(e + " Diese Datei Existiert nicht: " + path );
 					// throw new Exception("Datei nicht lesbar: " + pathname);
@@ -109,36 +142,16 @@ public class PlayList {
 	}
 	
 	public void saveAsM3U(String pathname) {
-		// code aus vorlesung
-//		File file = new File(pathname);
-//		FileWriter writer = null;
-//		
-//		try {
-//			writer = new FileWriter(file);
-//			writer.write("Test \n");
-//			writer.write("Test \n");
-//			writer.write("Test \n");
-//			writer.close();
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		} finally { // wird immer ausgeführt
-//			try {
-//				writer.close();
-//			} catch (IOException e) {
-//				e.printStackTrace();
-//			}
-//		}
-		
-		String[] data = new String[audioFileList.size()];
-		for (int i = 0; i < audioFileList.size(); i++) {
-		    data[i] = audioFileList.get(i).getPathname();
+		String[] data = new String[files.size()];
+		for (int i = 0; i < files.size(); i++) {
+		    data[i] = files.get(i).getPathname();
 		}
 		
 		writeFile(pathname, data);
 	}
 	
 	public List<AudioFile> getList() {
-		return this.audioFileList;
+		return this.files;
 	}
 	
 	public int getCurrent() {
@@ -203,5 +216,20 @@ public class PlayList {
 		}
 		
 		return lines;
+	}
+
+	public Iterator<AudioFile> iterator() {
+		return new ControllablePlayListIterator(files, search, sortCriterion);
+	}
+	
+	public String toString() {
+		String text = "";
+		
+	    for (int i = 0; i < files.size(); i++) {
+	        AudioFile file = files.get(i);
+	        text += file.toString() + ' ';
+	    }
+		
+		return text;
 	}
 }

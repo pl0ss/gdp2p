@@ -1,16 +1,24 @@
 package studiplayer.audio;
 
+import java.util.LinkedList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
-public class ControllablePlayListIterator implements Iterator {
+public class ControllablePlayListIterator implements Iterator<AudioFile> {
 	private List<AudioFile> files;
 	private int pos = 0;
 	
 	public ControllablePlayListIterator(List<AudioFile> files) {
 		this.files = files;
 	}
+	
+	public ControllablePlayListIterator(List<AudioFile> files, String search, SortCriterion sortCriterion) {
+		List<AudioFile> filteredFiles = getFilesIncludeSearch(files, search);
+        this.files = getFilesSorted(filteredFiles, sortCriterion);
+	}
+	
 	
 	public boolean hasNext() {
 		return pos < files.size();
@@ -30,23 +38,53 @@ public class ControllablePlayListIterator implements Iterator {
 		return null;
 	}
 	
+	public List<AudioFile> getFilesIncludeSearch(List<AudioFile> files, String search) {
+		if(search == null || search.equals("")) {
+			return files;
+		}
+		
+		
+		List<AudioFile> filteredFiles = new LinkedList<>();
+
+		for(AudioFile a : files) {
+			String autor = a.getAuthor();
+			if(autor.contains(search)) {
+				filteredFiles.add(a);
+				continue;
+			}
+			
+			String title = a.getTitle();
+			if(title.contains(search)) {
+				filteredFiles.add(a);
+				continue;
+			}
+			
+			if(a instanceof TaggedFile) {
+				String album = ((TaggedFile) a).getAlbum();
+				if(album.contains(search)) {
+					filteredFiles.add(a);
+					continue;
+				}
+			}
+		}
+		
+		return filteredFiles;
+	}
 	
-	public static void main(String[] args) throws NotPlayableException {
-		List<AudioFile> files = Arrays.asList(
-			new TaggedFile("audiofiles/Rock 812.mp3"),
-			new TaggedFile("audiofiles/Eisbach Deep Snow.ogg"),
-			new TaggedFile("audiofiles/wellenmeister_awakening.ogg")
-		);
+	public List<AudioFile> getFilesSorted(List<AudioFile> files, SortCriterion sortCriterion) {
+		List<AudioFile> filteredFiles = new LinkedList<>(files);
 		
-		ControllablePlayListIterator it = new ControllablePlayListIterator(files);
-		
-		while(it.hasNext()) {
-			System.out.println(it.next());
+		if(sortCriterion.equals(SortCriterion.DEFAULT)) {
+			
+		} else if(sortCriterion.equals(SortCriterion.AUTHOR)) {
+			filteredFiles.sort(new AuthorComparator());
+		} else if(sortCriterion.equals(SortCriterion.TITLE)) {
+			filteredFiles.sort(new TitleComparator());
+		} else if(sortCriterion.equals(SortCriterion.ALBUM)) {
+			filteredFiles.sort(new AlbumComparator());
+		} else if(sortCriterion.equals(SortCriterion.DURATION)) {
+			filteredFiles.sort(new DurationComparator());
 		}
-		
-		it.jumpToAudioFile(files.get(1));
-		while(it.hasNext()) {
-			System.out.println(it.next());
-		}
+		return filteredFiles;
 	}
 }
