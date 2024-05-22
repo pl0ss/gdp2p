@@ -69,9 +69,6 @@ public abstract class AudioFile {
 		String newPathname = parseReturnPathname(path);
 		// Prüfen, ob Datei lesbar ist
         File datei = new File(newPathname);
-        // if (!datei.canRead()) {
-        //     throw new RuntimeException("Datei nicht lesbar: " + newPathname);
-        // }
 
         if (!datei.canRead()) {
             throw new NotPlayableException(newPathname, "Datei nicht lesbar: " + newPathname);
@@ -233,7 +230,7 @@ public abstract class AudioFile {
 			return this.author;
 		}
 		
-		//* DEV für VA09
+		//* Bebugcode für VA09
 		return this.author + " - " + this.title;
 		// return this.author + " - " + this.title + " Album: " + getAlbum();
 	}

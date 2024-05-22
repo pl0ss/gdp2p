@@ -16,12 +16,7 @@ public class ControllablePlayListIterator implements Iterator<AudioFile> {
 	
 	public ControllablePlayListIterator(List<AudioFile> files, String search, SortCriterion sortCriterion) {
 		List<AudioFile> filteredFiles = getFilesIncludeSearch(files, search);
-        // this.files = getFilesSorted(filteredFiles, sortCriterion);
-
-		//* DEV für VA09
-		// List<AudioFile> filteredFiles2 = getFilesSorted(filteredFiles, sortCriterion);
-		// System.out.println("ControllablePlayListIterator:" + filteredFiles2);
-		// this.files = filteredFiles2;
+        this.files = getFilesSorted(filteredFiles, sortCriterion);
 	}
 	
 	
@@ -77,7 +72,6 @@ public class ControllablePlayListIterator implements Iterator<AudioFile> {
 	}
 	
 	public static List<AudioFile> getFilesSorted(List<AudioFile> files, SortCriterion sortCriterion) {
-    	System.out.println("sortFiles" + " " + sortCriterion);
 		List<AudioFile> filteredFiles = new LinkedList<>(files);
 		
 		if(sortCriterion.equals(SortCriterion.DEFAULT)) {

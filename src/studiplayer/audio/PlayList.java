@@ -44,36 +44,6 @@ public class PlayList implements Iterable<AudioFile> {
 	public void setSearch(String search) {
 		this.search = search;
 		resetIterator();
-		
-		// if(search != null & search != "") {
-			
-		// 	for(int i = 0; i < files.size(); i++) {
-		// 		AudioFile a = files.get(i);
-				
-		// 		String autor = a.getAuthor();
-		// 		if(autor.contains(search)) {
-		// 			i++;
-		// 			continue;
-		// 		}
-				
-		// 		String title = a.getTitle();
-		// 		if(title.contains(search)) {
-		// 			i++;
-		// 			continue;
-		// 		}
-				
-		// 		String album = "";
-		// 		if(a instanceof TaggedFile) {
-		// 			album = ((TaggedFile) a).getAlbum();
-		// 			if(album.contains(search)) {
-		// 				i++;
-		// 				continue;
-		// 			}
-		// 		}
-				
-		// 		files.remove(i);
-		// 	}
-		// }
 	}
 	public String getSearch() {
 		return search;
@@ -83,8 +53,6 @@ public class PlayList implements Iterable<AudioFile> {
 		this.sortCriterion = sortCriterion;
 		
 		resetIterator();
-		
-        //! files = ControllablePlayListIterator.getFilesSorted(files, sortCriterion);
 	}
     
 	
@@ -101,8 +69,6 @@ public class PlayList implements Iterable<AudioFile> {
 		if(files.size() == 1) {
 			currentAudioFile = file;	
 		}
-		
-        //! files = ControllablePlayListIterator.getFilesSorted(files, sortCriterion);
 	}
 	
 	public void remove(AudioFile file) {
@@ -119,15 +85,8 @@ public class PlayList implements Iterable<AudioFile> {
     }
 	
 	private void resetIterator() {
-        System.out.println("resetIterator_1: " + files);
 		this.iterator = new ControllablePlayListIterator(files, search, sortCriterion); // Sortiert files
-		
-		//! VA09
-		// List<AudioFile> sortedFiles = this.iterator.getFiles(); // da sonst irgendwie die sotierten files nicht übergeben werden
-		// this.files = sortedFiles;
 
-        System.out.println("resetIterator_2: " + files);
-        System.out.println("");
 		if (iterator.hasNext()) {
 			this.currentAudioFile = iterator.next();
 		} else {
@@ -140,11 +99,6 @@ public class PlayList implements Iterable<AudioFile> {
 			currentAudioFile = iterator.next();
 		} else {
 			resetIterator();
-			// if (iterator.hasNext()) {
-			// 	currentAudioFile = iterator.next();
-			// } else {
-			// 	currentAudioFile = null; // Wenn die liste leer ist
-			// }
 		}
 	}
 	
@@ -263,7 +217,7 @@ public class PlayList implements Iterable<AudioFile> {
 	        AudioFile file = files.get(i);
 	        textArray.add(file.toString());
 
-			// ! Deaktivieren, da sonst ein Test in VA09 nicht mehr geht
+			//* Bebugcode für VA09
 	        // textArray.add("Album: " + file.getAlbum());
 	    }
 		

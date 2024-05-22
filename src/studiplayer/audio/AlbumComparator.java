@@ -27,7 +27,6 @@ public class AlbumComparator implements Comparator<AudioFile> {
 //      }
         String alb2 = a2.getAlbum();
       
-//      System.out.println("AlbumComparator: " + a1 + " - " + alb1 + " ||| " + a2 + " - " + alb2);
 
 	    if(alb1 == null && alb2 == null) {
 	        return 0;
