@@ -51,7 +51,7 @@ public class TaggedFile extends SampledFile {
 			long duration = (long) tagMap.get("duration");
 			super.duration = duration;
 		} catch (Exception e) {
-			throw new NotPlayableException(getPathname(), e);
+			throw new NotPlayableException(getPathname(), e + " " + getPathname());
 		}
 	}
 	

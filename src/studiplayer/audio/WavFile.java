@@ -27,7 +27,7 @@ public class WavFile extends SampledFile {
 			
 			setDuration(computeDuration(numberOfFrames, frameRate));
 		} catch (Exception e) {
-			throw new NotPlayableException(getPathname(), e);
+			throw new NotPlayableException(getPathname(), e + " " + getPathname());
 		}
 	}
 	

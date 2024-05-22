@@ -23,9 +23,8 @@ public abstract class SampledFile extends AudioFile {
 		try {
 			studiplayer.basic.BasicPlayer.play(getPathname());
 		} catch (Exception e) {
-			throw new NotPlayableException(getPathname(), e);
+			throw new NotPlayableException(getPathname(), e + " " + getPathname());
 		}
-
 	}
 	
 	public void togglePause() {

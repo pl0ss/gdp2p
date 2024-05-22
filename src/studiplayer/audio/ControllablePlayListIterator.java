@@ -16,7 +16,12 @@ public class ControllablePlayListIterator implements Iterator<AudioFile> {
 	
 	public ControllablePlayListIterator(List<AudioFile> files, String search, SortCriterion sortCriterion) {
 		List<AudioFile> filteredFiles = getFilesIncludeSearch(files, search);
-        this.files = getFilesSorted(filteredFiles, sortCriterion);
+        // this.files = getFilesSorted(filteredFiles, sortCriterion);
+
+		//* DEV für VA09
+		// List<AudioFile> filteredFiles2 = getFilesSorted(filteredFiles, sortCriterion);
+		// System.out.println("ControllablePlayListIterator:" + filteredFiles2);
+		// this.files = filteredFiles2;
 	}
 	
 	
@@ -61,7 +66,7 @@ public class ControllablePlayListIterator implements Iterator<AudioFile> {
 			
 			if(a instanceof TaggedFile) {
 				String album = ((TaggedFile) a).getAlbum();
-				if(album.contains(search)) {
+				if(album != null && album.contains(search)) {
 					filteredFiles.add(a);
 					continue;
 				}
@@ -71,7 +76,8 @@ public class ControllablePlayListIterator implements Iterator<AudioFile> {
 		return filteredFiles;
 	}
 	
-	public List<AudioFile> getFilesSorted(List<AudioFile> files, SortCriterion sortCriterion) {
+	public static List<AudioFile> getFilesSorted(List<AudioFile> files, SortCriterion sortCriterion) {
+    	System.out.println("sortFiles" + " " + sortCriterion);
 		List<AudioFile> filteredFiles = new LinkedList<>(files);
 		
 		if(sortCriterion.equals(SortCriterion.DEFAULT)) {
@@ -85,6 +91,11 @@ public class ControllablePlayListIterator implements Iterator<AudioFile> {
 		} else if(sortCriterion.equals(SortCriterion.DURATION)) {
 			filteredFiles.sort(new DurationComparator());
 		}
+		
 		return filteredFiles;
+	}
+	
+	public List<AudioFile> getFiles() {
+	    return this.files;
 	}
 }

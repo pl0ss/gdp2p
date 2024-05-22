@@ -233,7 +233,9 @@ public abstract class AudioFile {
 			return this.author;
 		}
 		
+		//* DEV für VA09
 		return this.author + " - " + this.title;
+		// return this.author + " - " + this.title + " Album: " + getAlbum();
 	}
 	
 	
@@ -246,5 +248,10 @@ public abstract class AudioFile {
 	
 	public static void main(String[] args) {
 
+	}
+
+	public String getAlbum() { // wird von "TaggedFile" für "TaggedFile"s überschrieben
+		// somit kann man sich den test sparen, ob es instanceof TaggedFile ist 
+		return null;
 	}
 }

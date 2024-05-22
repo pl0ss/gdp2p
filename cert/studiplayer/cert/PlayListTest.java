@@ -310,7 +310,14 @@ public class PlayListTest {
         } catch (NotPlayableException e) {
             fail("Cannot create AudioFile:" + e.getMessage());
         }
+        
+//        System.out.println("");
+//        System.out.println("pl1_1:" + pl1);
+        
         pl1.setSortCriterion(SortCriterion.ALBUM);
+//        System.out.println("");
+//        System.out.println("pl1_2:" + pl1);
+        
         assertEquals(
                 "Sorting according to criterion album is not correct",
                 "[wellenmeister - tranquility - 02:21, "
@@ -318,6 +325,7 @@ public class PlayListTest {
                         + "Eisbach - Rock 812 - The Sea, the Sky - 05:31, "
                         + "Wellenmeister - TANOM Part I: Awakening - TheAbsoluteNecessityOfMeaning - 05:55]",
                 loop(pl1).toString());
+        
     }
     /**
      * Here we check sorting according to author criteria.

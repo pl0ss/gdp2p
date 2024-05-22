@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -23,16 +24,18 @@ import java.util.Scanner;
 
 public class PlayList implements Iterable<AudioFile> {
 	
-	private LinkedList<AudioFile> files = new LinkedList<AudioFile>();
-	private int current; // Position in der Abspielliste
+	private List<AudioFile> files = new ArrayList<AudioFile>();
 	private String search;
 	private SortCriterion sortCriterion = SortCriterion.DEFAULT;
+	private ControllablePlayListIterator iterator;
+	private AudioFile currentAudioFile;
 
 	public PlayList() {
-		current = 0;
+		resetIterator();
+		this.iterator = new ControllablePlayListIterator(files);
 	}
 	
-	public PlayList(String m3uPathname) throws NotPlayableException {
+	public PlayList(String m3uPathname) {
 		this();
 		loadFromM3U(m3uPathname);
 	}
@@ -40,37 +43,37 @@ public class PlayList implements Iterable<AudioFile> {
 	
 	public void setSearch(String search) {
 		this.search = search;
+		resetIterator();
 		
-		if(search != null & search != "") {
+		// if(search != null & search != "") {
 			
-			for(int i = 0; i < files.size(); i++) {
-				AudioFile a = files.get(i);
+		// 	for(int i = 0; i < files.size(); i++) {
+		// 		AudioFile a = files.get(i);
 				
-				String autor = a.getAuthor();
-				if(autor.contains(search)) {
-					i++;
-					continue;
-				}
+		// 		String autor = a.getAuthor();
+		// 		if(autor.contains(search)) {
+		// 			i++;
+		// 			continue;
+		// 		}
 				
-				String title = a.getTitle();
-				if(title.contains(search)) {
-					i++;
-					continue;
-				}
+		// 		String title = a.getTitle();
+		// 		if(title.contains(search)) {
+		// 			i++;
+		// 			continue;
+		// 		}
 				
-				String album = "";
-				if(a instanceof TaggedFile) {
-					album = ((TaggedFile) a).getAlbum();
-					if(album.contains(search)) {
-						i++;
-						continue;
-					}
-				}
+		// 		String album = "";
+		// 		if(a instanceof TaggedFile) {
+		// 			album = ((TaggedFile) a).getAlbum();
+		// 			if(album.contains(search)) {
+		// 				i++;
+		// 				continue;
+		// 			}
+		// 		}
 				
-				files.remove(i);
-			}
-			
-		}
+		// 		files.remove(i);
+		// 	}
+		// }
 	}
 	public String getSearch() {
 		return search;
@@ -78,6 +81,10 @@ public class PlayList implements Iterable<AudioFile> {
 	
 	public void setSortCriterion(SortCriterion sortCriterion) {
 		this.sortCriterion = sortCriterion;
+		
+		resetIterator();
+		
+        //! files = ControllablePlayListIterator.getFilesSorted(files, sortCriterion);
 	}
     
 	
@@ -89,10 +96,18 @@ public class PlayList implements Iterable<AudioFile> {
 	
 	public void add(AudioFile file) {
 		files.add(file);
+		resetIterator();
+		
+		if(files.size() == 1) {
+			currentAudioFile = file;	
+		}
+		
+        //! files = ControllablePlayListIterator.getFilesSorted(files, sortCriterion);
 	}
 	
 	public void remove(AudioFile file) {
 		files.remove(file);
+		resetIterator();
 	}
 	
 	public int size() {
@@ -100,28 +115,47 @@ public class PlayList implements Iterable<AudioFile> {
 	}
 	
 	public AudioFile currentAudioFile() {
-		if(files.size() == 0) {
-			return null;
-		}
+        return currentAudioFile;
+    }
+	
+	private void resetIterator() {
+        System.out.println("resetIterator_1: " + files);
+		this.iterator = new ControllablePlayListIterator(files, search, sortCriterion); // Sortiert files
 		
-		return this.files.get(current);
+		//! VA09
+		// List<AudioFile> sortedFiles = this.iterator.getFiles(); // da sonst irgendwie die sotierten files nicht übergeben werden
+		// this.files = sortedFiles;
+
+        System.out.println("resetIterator_2: " + files);
+        System.out.println("");
+		if (iterator.hasNext()) {
+			this.currentAudioFile = iterator.next();
+		} else {
+			this.currentAudioFile = null;
+		}
 	}
 	
 	public void nextSong() {
-		if(current > (files.size() -1)) {
-			// wenn Index auf einer ungültigen Position steht, dann 0
-			current = 0;
+		if (iterator.hasNext()) {
+			currentAudioFile = iterator.next();
 		} else {
-			current = (current +1) % (files.size());	
+			resetIterator();
+			// if (iterator.hasNext()) {
+			// 	currentAudioFile = iterator.next();
+			// } else {
+			// 	currentAudioFile = null; // Wenn die liste leer ist
+			// }
 		}
 	}
 	
 	public void loadFromM3U(String pathname) {
 		// neu initialisieren
-		current = 0;
+		int current = 0;
 		while(files.size() > 0) {
 			files.remove(0);
 		}
+		currentAudioFile = null;
+		resetIterator();
 
 
 		List<String> data = readFile(pathname);
@@ -139,6 +173,10 @@ public class PlayList implements Iterable<AudioFile> {
 				}
 			}
 		}
+
+		if(files.size() > 0) {
+			currentAudioFile = files.get(0);	
+		}
 	}
 	
 	public void saveAsM3U(String pathname) {
@@ -154,16 +192,7 @@ public class PlayList implements Iterable<AudioFile> {
 		return this.files;
 	}
 	
-	public int getCurrent() {
-		return this.current;
-	}
-	
-	public void setCurrent(int current) {
-		this.current = current;
-	}
-	
-	
-	static private void writeFile(String path, String[] lines) {
+	private static void writeFile(String path, String[] lines) {
 		// aus examples (Vorgabe)
 		FileWriter writer = null;
 		String sep = System.getProperty("line.separator");
@@ -188,7 +217,7 @@ public class PlayList implements Iterable<AudioFile> {
 	}
 	
 	
-	static private List<String> readFile(String path) {
+	private static List<String> readFile(String path) {
 		List<String> lines = new ArrayList<>();
 		Scanner scanner = null;
 		
@@ -222,14 +251,22 @@ public class PlayList implements Iterable<AudioFile> {
 		return new ControllablePlayListIterator(files, search, sortCriterion);
 	}
 	
+	public void jumpToAudioFile(AudioFile audioFile) {
+		iterator.jumpToAudioFile(audioFile);
+		currentAudioFile = audioFile;
+	}
+	
 	public String toString() {
-		String text = "";
+		List<String> textArray = new ArrayList<String>();
 		
 	    for (int i = 0; i < files.size(); i++) {
 	        AudioFile file = files.get(i);
-	        text += file.toString() + ' ';
+	        textArray.add(file.toString());
+
+			// ! Deaktivieren, da sonst ein Test in VA09 nicht mehr geht
+	        // textArray.add("Album: " + file.getAlbum());
 	    }
 		
-		return text;
+	    return "[" + String.join(", ", textArray) + "]";
 	}
 }
