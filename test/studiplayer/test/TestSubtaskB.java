@@ -1,111 +1,39 @@
 package studiplayer.test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertTrue;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.lang.reflect.Modifier;
 
 import org.junit.Test;
 
-import studiplayer.audio.AudioFileFactory;
-import studiplayer.audio.NotPlayableException;
 import studiplayer.audio.PlayList;
-import studiplayer.audio.TaggedFile;
-import studiplayer.audio.WavFile;
+import studiplayer.ui.Player;
 
 public class TestSubtaskB {
     @Test
-    public void testFactoryException() {
-        try {
-            AudioFileFactory.createAudioFile("does not exist.mp3");
-            fail("Expected exception NotPlayableException");
-        } catch (NotPlayableException e) {
-            // Expected
-        }
+    public void testUseCertPlayList() throws NoSuchFieldException, SecurityException, NoSuchMethodException {
+        assertTrue("Class Player must have an attribute useCertPlayList", Player.class.getDeclaredField("useCertPlayList") != null);
+        assertTrue("Attribute useCertPlayList must be of type boolean", Player.class.getDeclaredField("useCertPlayList").getType().equals(boolean.class));
+        assertTrue("Class Player must have a method setUseCertPlayList(value: boolean)", Player.class.getMethod("setUseCertPlayList", boolean.class) != null);
     }
-
+    
     @Test
-    public void testWavFileException() {
-        try {
-            new WavFile("does not exist.wav");
-            fail("Expected exception NotPlayableException");
-        } catch (NotPlayableException e) {
-            // Expected
-        }
+    public void testLoadPlayList() throws NoSuchFieldException, SecurityException, NoSuchMethodException {
+        assertTrue("Class Player must have a method loadPlayList(pathname: String)", Player.class.getMethod("loadPlayList", String.class) != null);
     }
-
+    
     @Test
-    public void testTaggedFileException() {
-        try {
-            new WavFile("does not exist.mp3");
-            fail("Expected exception NotPlayableException");
-        } catch (NotPlayableException e) {
-            // Expected
-        }
+    public void testDefaultPlaylistConstant() throws NoSuchFieldException, SecurityException, NoSuchMethodException {
+        assertTrue("Class Player must have a constant named DEFAULT_PLAYLIST", Player.class.getDeclaredField("DEFAULT_PLAYLIST") != null);
+        assertTrue("DEFAULT_PLAYLIST should be public", Modifier.isPublic(Player.class.getDeclaredField("DEFAULT_PLAYLIST").getModifiers()));
+        assertTrue("DEFAULT_PLAYLIST should be static", Modifier.isStatic(Player.class.getDeclaredField("DEFAULT_PLAYLIST").getModifiers()));
+        assertEquals("DEFAULT_PLAYLIST should be a String", String.class, Player.class.getDeclaredField("DEFAULT_PLAYLIST").getType());
     }
-
+    
     @Test
-    public void testPlayException() throws IOException {
-        File file = File.createTempFile("test", "mp3");
-        try {
-            TaggedFile taggedFile = new TaggedFile();
-            taggedFile.parsePathname(file.getAbsolutePath());
-            taggedFile.parseFilename(taggedFile.getFilename());
-            taggedFile.play();
-            fail("Expected exception NotPlayableException");
-        } catch (NotPlayableException e) {
-            // Expected
-        }
-    }
-
-    @Test
-    public void testReadAndStoreTagsException() throws IOException {
-        File file = File.createTempFile("test", "mp3");
-        try {
-            TaggedFile taggedFile = new TaggedFile();
-            taggedFile.parsePathname(file.getAbsolutePath());
-            taggedFile.parseFilename(taggedFile.getFilename());
-            taggedFile.readAndStoreTags();
-            fail("Expected exception NotPlayableException");
-        } catch (NotPlayableException e) {
-            // Expected
-        }
-    }
-
-    @Test
-    public void testReadAndSetDurationException() throws IOException {
-        File file = File.createTempFile("test", "wav");
-        try {
-            WavFile wavFile = new WavFile();
-            wavFile.parsePathname(file.getAbsolutePath());
-            wavFile.parseFilename(wavFile.getFilename());
-            wavFile.readAndSetDurationFromFile();
-            fail("Expected exception NotPlayableException");
-        } catch (NotPlayableException e) {
-            // Expected
-        }
-    }
-
-    @Test
-    public void testPlayListCanReadParts() throws IOException {
-        File file = File.createTempFile("test", "m3u");
-        try (FileWriter writer = new FileWriter(file)) {
-            writer.write(new StringBuilder()
-                    .append("audiofiles/Rock 812.mp3\n")
-                    .append("audiofiles/wellenmeister_awakening.ogg\n")
-                    .append("audiofiles/unknown.mp3\n")
-                    .append("audiofiles/other.abc\n")
-                    .toString());
-            writer.close();
-        }
-        PlayList pl = new PlayList();
-        try {
-            pl.loadFromM3U(file.getAbsolutePath());
-        } catch (Throwable t) {
-            fail("We should not get an exception");
-        }
-        assertEquals(2, pl.size());
+    public void testPlayListAttribut() throws NoSuchFieldException, SecurityException, NoSuchMethodException {
+        assertTrue("Class Player must have an attribute playList", Player.class.getDeclaredField("playList") != null);
+        assertTrue("Attribute playList must be of type PlayList", Player.class.getDeclaredField("playList").getType().equals(PlayList.class));
     }
 }

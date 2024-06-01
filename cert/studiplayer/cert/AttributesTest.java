@@ -22,6 +22,7 @@ import studiplayer.audio.SortCriterion;
 import studiplayer.audio.TaggedFile;
 import studiplayer.audio.TitleComparator;
 import studiplayer.audio.WavFile;
+import studiplayer.ui.Player;
 
 @SuppressWarnings("rawtypes")
 public class AttributesTest {
@@ -39,6 +40,7 @@ public class AttributesTest {
             TaggedFile.class,
             TitleComparator.class,
             WavFile.class,
+            Player.class
             };
 
     @Test
