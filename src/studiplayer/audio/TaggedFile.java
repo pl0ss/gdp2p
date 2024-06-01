@@ -57,7 +57,14 @@ public class TaggedFile extends SampledFile {
 	
 	public String toString() {
 		String album = getAlbum();
-		String album_str = (album != "" && album != null) ? album + " - " : "";
+		String album_str = (!album.equals("") && album != null) ? album + " - " : "";
+
+		// String album_str;
+		// if(!album.equals("") && album != null) {
+		// 	album_str = album + " - ";
+		// } else {
+		// 	album_str = "";
+		// }
 		
 		return super.toString() + " - " + album_str + formatDuration();
 	}
