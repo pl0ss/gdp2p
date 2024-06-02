@@ -117,7 +117,7 @@ public class Player extends Application {
 				Label playListLabel1 = new Label("Playlist: ");
 				playListLabel1.setPadding(new Insets(5, 5, 5, 5));
 				infoGrid.add(playListLabel1, 0, 0);
-				Label playListLabel = new Label("/path/");
+				Label playListLabel = new Label("/path/"); // ToDo: muss ich das noch anpassen?
 				playListLabel.setPadding(new Insets(5, 5, 5, 5));
 				infoGrid.add(playListLabel, 1, 0);
 				
@@ -222,7 +222,7 @@ public class Player extends Application {
 		launch();
 	}
 	
-	
+
 	public void listDir() { //! Debug
         URL url;
 		try {
