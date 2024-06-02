@@ -47,20 +47,20 @@ public class ControllablePlayListIterator implements Iterator<AudioFile> {
 		List<AudioFile> filteredFiles = new LinkedList<>();
 
 		for(AudioFile a : files) {
-			String autor = a.getAuthor();
+			String autor = a.getAuthor().toLowerCase(); //* toLowerCase: eigene Idee
 			if(autor.contains(search)) {
 				filteredFiles.add(a);
 				continue;
 			}
 			
-			String title = a.getTitle();
+			String title = a.getTitle().toLowerCase();
 			if(title.contains(search)) {
 				filteredFiles.add(a);
 				continue;
 			}
 			
 			if(a instanceof TaggedFile) {
-				String album = ((TaggedFile) a).getAlbum();
+				String album = ((TaggedFile) a).getAlbum().toLowerCase();
 				if(album != null && album.contains(search)) {
 					filteredFiles.add(a);
 					continue;

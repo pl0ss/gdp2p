@@ -2,8 +2,14 @@ package studiplayer.ui;
 
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -12,6 +18,7 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TableView.TableViewSelectionModel;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
 import javafx.scene.image.Image;
@@ -25,7 +32,9 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import studiplayer.audio.AudioFile;
 import studiplayer.audio.PlayList;
+import studiplayer.audio.SortCriterion;
 
 public class Player extends Application {
 	
@@ -33,9 +42,10 @@ public class Player extends Application {
 	private static final String PLAYLIST_DIRECTORY = "";
 	private static final String INITIAL_PLAY_TIME_LABEL = "00:00";
 	private static final String NO_CURRENT_SONG = " - ";
+    private static final ObservableList<String> sortierKriterien = FXCollections.observableArrayList("Standard", "Autor", "Titel", "Album", "Dauer");
 	
 	private PlayList playList;
-	public boolean useCertPlayList = false;
+	private boolean useCertPlayList = false;
 	
 	
 	//* UI Elements
@@ -46,7 +56,7 @@ public class Player extends Application {
 	private Label playListLabel;
 	private Label playTimeLabel;
 	private Label currentSongLabel;
-	private ChoiceBox sortChoiceBox;
+	private ChoiceBox<String> sortChoiceBox;
 	private TextField searchTextField;
 	private Button filterButton;
 	
@@ -93,14 +103,14 @@ public class Player extends Application {
 				sortierungLabel.setPrefWidth(70);
 				sortierung.getChildren().add(sortierungLabel);
 			
-				sortChoiceBox = new ChoiceBox();
+				sortChoiceBox = new ChoiceBox(sortierKriterien);
 				sortChoiceBox.setPrefWidth(200);
 				sortierung.getChildren().add(sortChoiceBox);
 				
 				VBox ButtonBox = new VBox();
 				ButtonBox.setPadding(new Insets(0, 0, 0, 20));
-					Button btnAnzeigen = new Button("Anzeigen");
-					ButtonBox.getChildren().add(btnAnzeigen);
+					filterButton = new Button("Anzeigen");
+					ButtonBox.getChildren().add(filterButton);
 					sortierung.getChildren().add(ButtonBox);
 				
 		
@@ -117,21 +127,21 @@ public class Player extends Application {
 				Label playListLabel1 = new Label("Playlist: ");
 				playListLabel1.setPadding(new Insets(5, 5, 5, 5));
 				infoGrid.add(playListLabel1, 0, 0);
-				Label playListLabel = new Label("/path/"); // ToDo: muss ich das noch anpassen?
+				playListLabel = new Label();
 				playListLabel.setPadding(new Insets(5, 5, 5, 5));
 				infoGrid.add(playListLabel, 1, 0);
 				
 				Label currentSongLabel1 = new Label("Aktuell: ");
 				currentSongLabel1.setPadding(new Insets(0, 5, 5, 5));
 				infoGrid.add(currentSongLabel1, 0, 1);
-				Label currentSongLabel = new Label(NO_CURRENT_SONG); // ToDo: muss ich das noch anpassen?
+				currentSongLabel = new Label();
 				currentSongLabel.setPadding(new Insets(0, 5, 5, 5));
 				infoGrid.add(currentSongLabel, 1, 1);
 				
 				Label playTimeLabel1 = new Label("Abspielzeit: ");
 				playTimeLabel1.setPadding(new Insets(0, 5, 5, 5));
 				infoGrid.add(playTimeLabel1, 0, 2);
-				Label playTimeLabel= new Label(INITIAL_PLAY_TIME_LABEL); // ToDo: muss ich das noch anpassen?
+				playTimeLabel = new Label();
 				playTimeLabel.setPadding(new Insets(0, 5, 5, 5));
 				infoGrid.add(playTimeLabel, 1, 2);
 				
@@ -140,17 +150,16 @@ public class Player extends Application {
 			buttons.setPadding(new Insets(5, 5, 5, 5));
 			buttons.setAlignment(Pos.CENTER);
 			sectionBottom.getChildren().add(buttons);
-				Button playButton = createButton("play.jpg");
+				playButton = createButton("play.jpg");
 				buttons.getChildren().add(playButton);
-				Button pauseButton = createButton("pause.jpg");
+				pauseButton = createButton("pause.jpg");
 				buttons.getChildren().add(pauseButton);
-				Button stopButton = createButton("stop.jpg");
+				stopButton = createButton("stop.jpg");
 				buttons.getChildren().add(stopButton);
-				Button nextButton = createButton("next.jpg");
+				nextButton = createButton("next.jpg");
 				buttons.getChildren().add(nextButton);
 		
 		
-
 		
 		paneMain.setTop(sectionFilter);
 		paneMain.setCenter(sectionPlaylist);
@@ -160,7 +169,52 @@ public class Player extends Application {
 		Scene scene = new Scene(paneMain, 600, 400);
 		stage.setScene(scene);
 		stage.show();
+		
+		// Falls das Abspielen nicht direkt beginnen soll
+		setButtonStates(true, false, false, false); // ToDo: passt das so?
+		
+		update_playListLabel();
+		updateSongInfo(playList.currentAudioFile());
+		
+		
+		
+		searchTextField.setOnAction(e -> {
+			playlistSearch(playlist_tabelle, true);
+		});
+		searchTextField.setOnKeyReleased(e -> {
+			playlistSearch(playlist_tabelle, true);
+		});
+		
+		sortChoiceBox.setOnAction(e -> {
+			playlistFilter(playlist_tabelle, true);
+		});
+		
+		filterButton.setOnAction(e -> {
+			playlistSearchFilter(playlist_tabelle);
+		});
+		
+		
+		playButton.setOnAction(e -> {
+			playCurrentSong();
+		});
+		
+		pauseButton.setOnAction(e -> {
+			pauseCurrentSong();
+		});
+		
+		stopButton.setOnAction(e -> {
+			stopCurrentSong();
+		});
+		
+		nextButton.setOnAction(e -> {
+			nextSong();
+		});
+		
+		playlist_tabelle.setRowSelectionHandler(e -> {
+			playSelectedSong(playlist_tabelle.getSelectionModel());
+		});
 	}
+	
 	
 	public PlayList askForPlayList(Stage stage) {
 		if(!useCertPlayList) { // Playlist PopUp
@@ -190,7 +244,7 @@ public class Player extends Application {
 		} else {
 			playList = new PlayList(pathname);
 		}
-		
+
 		return playList;
 	}
 	
@@ -217,6 +271,131 @@ public class Player extends Application {
 		return button;
 	}
 	
+	private void playlistSearchFilter(SongTable playlist_tabelle) {
+		playlistSearch(playlist_tabelle, false);
+		playlistFilter(playlist_tabelle, true);
+		
+	}
+	private void playlistSearch(SongTable playlist_tabelle, boolean refresh) {
+		String search = searchTextField.getText();
+		playList.setSearch(search);
+
+		if(refresh) {
+			playlist_tabelle.refreshSongs();
+		}
+	}
+	private void playlistFilter(SongTable playlist_tabelle, boolean refresh) {
+		String sort_str = (String) sortChoiceBox.getValue();
+		if(sort_str == null || sort_str.equals(sortierKriterien.get(0))) {
+			playList.setSortCriterion(SortCriterion.DEFAULT);
+		} else if(sort_str.equals(sortierKriterien.get(1))) {
+			playList.setSortCriterion(SortCriterion.AUTHOR);
+		} else if(sort_str.equals(sortierKriterien.get(2))) {
+			playList.setSortCriterion(SortCriterion.TITLE);
+		} else if(sort_str.equals(sortierKriterien.get(3))) {
+			playList.setSortCriterion(SortCriterion.ALBUM);
+		} else if(sort_str.equals(sortierKriterien.get(4))) {
+			playList.setSortCriterion(SortCriterion.DURATION);
+		}
+
+		if(refresh) {
+			playlist_tabelle.refreshSongs();
+		}
+	}
+
+	private void playCurrentSong() {
+		System.out.println("play");
+		// ToDo
+		// - aktualisiere die Informationen zum aktuellen Song und setze die Abspielzeit auf „00:00“
+		// - passe die Button-Zustände (setDisable(true|false)) an, Abbildung 1 und Abbildung 4 zeigen den Zustand der Buttons wenn ein Lied abgespielt wird bzw. der Player gestoppt ist.
+		// - beginne mit der Wiedergabe
+		
+		setButtonStates(false, true, true, true); // ToDo: passt das so? 
+	}
+	
+	private void pauseCurrentSong() {
+		System.out.println("pause");
+		// ToDo
+		// - falls Song abgespielt wird: pausiere die Wiedergabe
+		// - falls Song pausiert ist: setze die Wiedergabe fort
+		
+		setButtonStates(true, false, true, true); // ToDo: passt das so?
+	}
+
+	private void stopCurrentSong() {
+		System.out.println("stop");
+		// ToDo
+		// - unterbreche die aktuelle Wiedergabe
+		// - passe die Button-Zustände an
+		// - setze die Abspielzeit zurück.
+		
+		setButtonStates(true, false, false, true); // ToDo: passt das so?
+		updateSongInfo(playList.currentAudioFile());
+	}
+	
+	private void nextSong() {
+		System.out.println("next");
+		// - unterbreche die aktuelle Wiedergabe, falls aktiv
+		// - springe zum nächsten Song
+		// - zeige die Song-Information an und setze die Abspielzeit auf „00:00“
+		// - passe die Button-Zustände an
+		playList.nextSong();
+		
+		setButtonStates(true, true, true, true); // ToDo: passt das so?
+		updateSongInfo(playList.currentAudioFile());
+	}
+	
+	private void playSelectedSong(TableViewSelectionModel<Song> tableViewSelectionModel) { // ToDo
+		System.out.println(tableViewSelectionModel);
+	}
+	
+	private void setButtonStates(boolean playButtonState, boolean pauseButtonState, boolean stopButtonState, boolean nextButtonState) {
+		playButton.setDisable(!playButtonState);
+		pauseButton.setDisable(!pauseButtonState);
+		stopButton.setDisable(!stopButtonState);
+		nextButton.setDisable(!nextButtonState);
+	}
+	
+	private void updateSongInfo(AudioFile af) {
+		update_currentSongLabel(af);
+		update_playTimeLabel(af);
+	}
+	private void update_currentSongLabel(AudioFile af) {
+		Platform.runLater(() -> {
+			if (af == null) {
+				currentSongLabel.setText(NO_CURRENT_SONG);
+			} else {
+				String title = playList.currentAudioFile().getTitle();
+				String author = playList.currentAudioFile().getAuthor();
+				String album = playList.currentAudioFile().getAlbum();
+				
+				String text = author + " - " + title; //* leicht abgewandelt
+				if(album != null) {
+					text += " - " + album;
+				}
+				
+				currentSongLabel.setText(text);
+			}
+		});
+	}
+	private void update_playTimeLabel(AudioFile af) {
+		Platform.runLater(() -> {
+			if (af == null) {
+				playTimeLabel.setText(INITIAL_PLAY_TIME_LABEL);
+			} else {
+				String duration = playList.currentAudioFile().formatDuration();
+				String position = playList.currentAudioFile().formatPosition();
+				
+				String text = position + " - " + duration; //* leicht abgewandelt
+				
+				playTimeLabel.setText(text);
+			}
+		});	
+	}
+	private void update_playListLabel() {
+		String text = "/path/"; // ToDo: muss noch angepasst werden
+		playListLabel.setText(text);
+	}
 	
 	public static void main(String[] args) {
 		launch();
