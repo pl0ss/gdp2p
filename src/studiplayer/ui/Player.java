@@ -17,6 +17,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
+import javafx.scene.control.Labeled;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TableView.TableViewSelectionModel;
 import javafx.scene.control.TextField;
@@ -28,24 +29,37 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.TextAlignment;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import studiplayer.audio.AudioFile;
+import studiplayer.audio.NotPlayableException;
 import studiplayer.audio.PlayList;
 import studiplayer.audio.SortCriterion;
 
 public class Player extends Application {
 	
+	//* Settings
+	private final Boolean playtimeProgressBar = true; // Bonus
+	
+	//* Consts
 	public static final String DEFAULT_PLAYLIST = "playList.cert.m3u";
-	private static final String PLAYLIST_DIRECTORY = "";
+	private static final String PLAYLIST_DIRECTORY = "playlists/";
 	private static final String INITIAL_PLAY_TIME_LABEL = "00:00";
 	private static final String NO_CURRENT_SONG = " - ";
     private static final ObservableList<String> sortierKriterien = FXCollections.observableArrayList("Standard", "Autor", "Titel", "Album", "Dauer");
 	
+    //* Vars
 	private PlayList playList;
 	private boolean useCertPlayList = false;
+	private String selectedPlaylist = "-";
+	private boolean songIsPaused = false;
+	
+	//* 
+	private PlayerThread playerThread;
+	private TimerThread timerThread;
 	
 	
 	//* UI Elements
@@ -55,14 +69,16 @@ public class Player extends Application {
 	private Button nextButton;
 	private Label playListLabel;
 	private Label playTimeLabel;
+	private Label playTimeLabel2; // für playtimeProgressBar
+	private Label playTimeLabel3; // für playtimeProgressBar
+	private Label playTimeLabel4; // für playtimeProgressBar
 	private Label currentSongLabel;
 	private ChoiceBox<String> sortChoiceBox;
 	private TextField searchTextField;
 	private Button filterButton;
-	
 
 	public Player() {
-
+		// ToDo: soll hier irgendwas passieren?
 	}
 	
 	
@@ -141,9 +157,27 @@ public class Player extends Application {
 				Label playTimeLabel1 = new Label("Abspielzeit: ");
 				playTimeLabel1.setPadding(new Insets(0, 5, 5, 5));
 				infoGrid.add(playTimeLabel1, 0, 2);
-				playTimeLabel = new Label();
-				playTimeLabel.setPadding(new Insets(0, 5, 5, 5));
-				infoGrid.add(playTimeLabel, 1, 2);
+				
+				if(!playtimeProgressBar) {
+					playTimeLabel = new Label();
+					playTimeLabel.setPadding(new Insets(0, 5, 5, 5));
+					infoGrid.add(playTimeLabel, 1, 2);
+				} else {
+					HBox playTimeLabelBox = new HBox();
+					playTimeLabelBox.setPadding(new Insets(0, 5, 5, 5));
+					infoGrid.add(playTimeLabelBox, 1, 2);
+						playTimeLabel = new Label();
+						playTimeLabelBox.getChildren().add(playTimeLabel);
+						playTimeLabel2 = new Label();
+						playTimeLabel2.setPrefWidth(35);
+						playTimeLabel2.setAlignment(Pos.CENTER_RIGHT);
+						playTimeLabelBox.getChildren().add(playTimeLabel2);
+						playTimeLabel3 = new Label();
+						playTimeLabel3.setPadding(new Insets(0, 5, 0, 5));
+						playTimeLabelBox.getChildren().add(playTimeLabel3);
+						playTimeLabel4 = new Label();
+						playTimeLabelBox.getChildren().add(playTimeLabel4);
+				}
 				
 			
 			HBox buttons = new HBox();
@@ -171,11 +205,10 @@ public class Player extends Application {
 		stage.show();
 		
 		// Falls das Abspielen nicht direkt beginnen soll
-		setButtonStates(true, false, false, false); // ToDo: passt das so?
+		setButtonStates(true, false, false, false);
 		
-		update_playListLabel();
+		updatePlayListLabel();
 		updateSongInfo(playList.currentAudioFile());
-		
 		
 		
 		searchTextField.setOnAction(e -> {
@@ -240,10 +273,11 @@ public class Player extends Application {
 	public PlayList loadPlayList(String pathname) {
 		if(pathname == null || pathname.trim().equals("")) {
 			// DEFAULT_PLAYLIST verwenden
-			playList = new PlayList("playlists/" + DEFAULT_PLAYLIST);
-		} else {
-			playList = new PlayList(pathname);
+			pathname = PLAYLIST_DIRECTORY + DEFAULT_PLAYLIST;
 		}
+
+		playList = new PlayList(pathname);
+		selectedPlaylist = pathname;
 
 		return playList;
 	}
@@ -300,49 +334,76 @@ public class Player extends Application {
 	}
 
 	private void playCurrentSong() {
-		System.out.println("play");
-		// ToDo
+		// System.out.println("play");
 		// - aktualisiere die Informationen zum aktuellen Song und setze die Abspielzeit auf „00:00“
 		// - passe die Button-Zustände (setDisable(true|false)) an, Abbildung 1 und Abbildung 4 zeigen den Zustand der Buttons wenn ein Lied abgespielt wird bzw. der Player gestoppt ist.
 		// - beginne mit der Wiedergabe
 		
-		setButtonStates(false, true, true, true); // ToDo: passt das so? 
+		startThreads(false);
+		
+		if(songIsPaused) {
+			pauseCurrentSong();
+		}
+		
+		setButtonStates(false, true, true, true); // muss nach "pauseCurrentSong" sein
 	}
 	
 	private void pauseCurrentSong() {
-		System.out.println("pause");
-		// ToDo
+		// System.out.println("pause");
 		// - falls Song abgespielt wird: pausiere die Wiedergabe
 		// - falls Song pausiert ist: setze die Wiedergabe fort
 		
-		setButtonStates(true, false, true, true); // ToDo: passt das so?
+		playList.currentAudioFile().togglePause();
+		songIsPaused = !songIsPaused;
+
+		setButtonStates(true, false, true, true);
 	}
 
 	private void stopCurrentSong() {
-		System.out.println("stop");
-		// ToDo
+		// System.out.println("stop");
 		// - unterbreche die aktuelle Wiedergabe
 		// - passe die Button-Zustände an
 		// - setze die Abspielzeit zurück.
 		
-		setButtonStates(true, false, false, true); // ToDo: passt das so?
+		songIsPaused = false;
+		
+		setButtonStates(true, false, false, true); // ToDo: Skip auf true lassen?
 		updateSongInfo(playList.currentAudioFile());
+		
+		stopThreads(false);
 	}
 	
 	private void nextSong() {
-		System.out.println("next");
+		// System.out.println("next");
 		// - unterbreche die aktuelle Wiedergabe, falls aktiv
 		// - springe zum nächsten Song
 		// - zeige die Song-Information an und setze die Abspielzeit auf „00:00“
 		// - passe die Button-Zustände an
 		playList.nextSong();
 		
-		setButtonStates(true, true, true, true); // ToDo: passt das so?
+		songIsPaused = false;
+		
+		setButtonStates(false, true, true, true);
 		updateSongInfo(playList.currentAudioFile());
+		
+		stopPlayerThread();
+		startPlayerThread();
+		startTimerThread(); // wenn nach "Stop" "Next" gedrückt wird
 	}
 	
-	private void playSelectedSong(TableViewSelectionModel<Song> tableViewSelectionModel) { // ToDo
-		System.out.println(tableViewSelectionModel);
+	private void playSelectedSong(TableViewSelectionModel<Song> tableViewSelectionModel) { // wie würde die Lösung ohne "jumpToAudioFileIndex" aussehen
+		int index = tableViewSelectionModel.getSelectedIndex();
+		playList.jumpToAudioFileIndex(index);
+		
+		updateSongInfo(playList.currentAudioFile());
+		
+		// play ausführen, falls player gestoppt ist oder noch nie gestartet wurde
+		if(!playButton.isDisable()) {
+			playCurrentSong();
+		}
+		
+		stopPlayerThread();
+		startPlayerThread();
 	}
 	
 	private void setButtonStates(boolean playButtonState, boolean pauseButtonState, boolean stopButtonState, boolean nextButtonState) {
@@ -353,10 +414,10 @@ public class Player extends Application {
 	}
 	
 	private void updateSongInfo(AudioFile af) {
-		update_currentSongLabel(af);
-		update_playTimeLabel(af);
+		updateCurrentSongLabel(af);
+		updatePlayTimeLabel(af);
 	}
-	private void update_currentSongLabel(AudioFile af) {
+	private void updateCurrentSongLabel(AudioFile af) {
 		Platform.runLater(() -> {
 			if (af == null) {
 				currentSongLabel.setText(NO_CURRENT_SONG);
@@ -374,26 +435,164 @@ public class Player extends Application {
 			}
 		});
 	}
-	private void update_playTimeLabel(AudioFile af) {
+	private void updatePlayTimeLabel(AudioFile af) {
 		Platform.runLater(() -> {
 			if (af == null) {
-				playTimeLabel.setText(INITIAL_PLAY_TIME_LABEL);
+				if(!playtimeProgressBar) {
+					playTimeLabel.setText(INITIAL_PLAY_TIME_LABEL);
+				} else {
+					playTimeLabel.setText(INITIAL_PLAY_TIME_LABEL);
+					playTimeLabel2.setText("");
+					playTimeLabel3.setText("");
+					playTimeLabel4.setText("");
+				}
+				
 			} else {
-				String duration = playList.currentAudioFile().formatDuration();
-				String position = playList.currentAudioFile().formatPosition();
+				String formatPosition = playList.currentAudioFile().formatPosition();
+				String formatDuration = playList.currentAudioFile().formatDuration();
 				
-				String text = position + " - " + duration; //* leicht abgewandelt
-				
-				playTimeLabel.setText(text);
+				if(!playtimeProgressBar) {
+					String text = formatPosition + " - " + formatDuration; //* leicht abgewandelt
+					playTimeLabel.setText(text);	
+				} else {
+					long position = playList.currentAudioFile().getPosition();
+					long duration = playList.currentAudioFile().getDuration();
+					int progress = (int) ( ( (double) position / (double) duration) * 100 ); // in Prozent
+					
+					playTimeLabel.setText("");
+					playTimeLabel2.setText(formatPosition);
+					playTimeLabel3.setText(getProgressBar(progress));
+					playTimeLabel4.setText(formatDuration);
+				}
 			}
 		});	
 	}
-	private void update_playListLabel() {
-		String text = "/path/"; // ToDo: muss noch angepasst werden
-		playListLabel.setText(text);
+	private void updatePlayListLabel() {
+		playListLabel.setText(selectedPlaylist);
+	}
+	
+	public String getProgressBar(int progress) {
+		int breite = 20;
+		String start = "<";
+		String end = ">";
+		String current = "⦁";
+		String space = "-";
+		
+		String str = "";
+		str += start;
+		
+		int pos = progress / (100/breite); 
+		for(int i = 0; i < 20; i++) {
+			if(i != pos) {
+				str += space;
+			} else {
+				str += current;
+			}
+		}
+		
+		str += end;
+		
+		return str;
 	}
 	
 	public static void main(String[] args) {
 		launch();
+	}
+	
+	public void stop() {
+		stopThreads(false);
+		try {
+			super.stop();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
+	public class PlayerThread extends Thread {
+		private boolean stopped;
+		
+		public void terminate() {
+			stopped = true;
+			playerThread = null;
+			playList.currentAudioFile().stop();
+		}
+		
+		public void run() {
+            while (!stopped) {
+//    			System.out.println("PlayerThread");
+    			
+    			try {
+					playList.currentAudioFile().play();
+				} catch (NotPlayableException e) {
+					e.printStackTrace();
+				}
+    			
+            	try {
+            		Thread.sleep(100);
+                } catch (InterruptedException e) {
+                }
+			}
+		}
+	}
+	
+	public class TimerThread extends Thread {
+		private boolean stopped;
+		
+		public void terminate() {
+			stopped = true;
+			timerThread = null;
+		}
+		
+		public void run() {
+            while (!stopped) {
+//    			System.out.println("TimerThread");
+    			
+    			updatePlayTimeLabel(playList.currentAudioFile());
+    			
+            	try {
+            		Thread.sleep(100);
+                } catch (InterruptedException e) {
+                }
+			}
+		}
+	}
+	
+	private void startThreads(boolean onlyTimer) {
+		if(!onlyTimer) {
+			startPlayerThread();
+		}
+		
+		startTimerThread();
+	}
+	private void startPlayerThread() {
+		if(playerThread == null) {
+			playerThread = new PlayerThread();
+			playerThread.start();
+		}
+	}
+	private void startTimerThread() {
+		if(timerThread == null) {
+			timerThread = new TimerThread();
+			timerThread.start();
+		}
+	}
+
+	private void stopThreads(boolean onlyTimer) {
+		if(!onlyTimer) {
+			stopPlayerThread();
+		}
+		
+		stopTimerThread();
+	}
+	private void stopPlayerThread() {
+		if(playerThread != null) {
+			playerThread.terminate();
+		}
+	}
+	private void stopTimerThread() {
+		if(timerThread != null) {
+			timerThread.terminate();
+		}
 	}
 }

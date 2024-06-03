@@ -70,7 +70,7 @@ public abstract class SampledFile extends AudioFile {
 	}
 	
 	public String formatPosition() {
-		long pos = studiplayer.basic.BasicPlayer.getPosition();
+		long pos = getPosition();
 		return microSec2time(pos, true);
 	}
 	
@@ -80,6 +80,10 @@ public abstract class SampledFile extends AudioFile {
 	
 	public long getDuration() {
 		return duration;
+	}
+
+	public long getPosition() {
+		return studiplayer.basic.BasicPlayer.getPosition();
 	}
 	
 	public void setDuration(long duration) {

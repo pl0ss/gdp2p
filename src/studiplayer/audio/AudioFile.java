@@ -251,4 +251,11 @@ public abstract class AudioFile {
 		// somit kann man sich den test sparen, ob es instanceof TaggedFile ist 
 		return null;
 	}
+
+	public long getDuration() { // für playtimeProgressBar als Bonus
+		return -1;
+	}
+	public long getPosition() { // für playtimeProgressBar als Bonus
+		return -1;
+	}
 }

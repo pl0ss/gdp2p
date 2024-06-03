@@ -209,6 +209,9 @@ public class PlayList implements Iterable<AudioFile> {
 		iterator.jumpToAudioFile(audioFile);
 		currentAudioFile = audioFile;
 	}
+	public void jumpToAudioFileIndex(int index) {
+		jumpToAudioFile(files.get(index));
+	}
 	
 	public String toString() {
 		List<String> textArray = new ArrayList<String>();
