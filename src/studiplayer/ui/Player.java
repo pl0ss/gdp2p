@@ -249,13 +249,9 @@ public class Player extends Application {
 	}
 	
 	private Button createButton(String iconfile) { // aus der angabe übernommen
-
-		// listDir(); //! Debug
-		
 		Button button = null;
 		try {
-			URL url = getClass().getResource("/icons/" + iconfile); //! so gehts nur, wenn die icons noch in einem zwischen ordner sind
-			// URL url = getClass().getResource("/" + iconfile); //! es geht nur so, aber auch nur wenn icons ein source folder ist
+			URL url = getClass().getResource("/icons/" + iconfile); // icons Ordner muss in src (oder einem anderen SourceFolder) liegen
 			Image icon = new Image(url.toString());
 			ImageView imageView = new ImageView(icon);
 			imageView.setFitHeight(20);
@@ -400,37 +396,4 @@ public class Player extends Application {
 	public static void main(String[] args) {
 		launch();
 	}
-	
-
-	public void listDir() { //! Debug
-        URL url;
-		try {
-			url = getClass().getResource("/");
-	        System.out.println(url);
-	        
-	        if (url != null) {
-	            File resourceFolder = new File(url.getFile());
-	            listFilesAndFolders(resourceFolder);
-	        } else {
-	            System.out.println("Der Pfad zur Ressource wurde nicht gefunden.");
-	        }
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-	}
-    public static void listFilesAndFolders(File folder) { //! Debug
-        if (folder.isDirectory()) {
-        	System.out.println("Ordner: " + folder.getAbsolutePath());
-            File[] files = folder.listFiles();
-            if (files != null) {
-                for (File file : files) {
-                    listFilesAndFolders(file);
-                }
-            }
-        } else {
-        	System.out.println("Datei: " + folder.getAbsolutePath());
-        }
-    }
 }
