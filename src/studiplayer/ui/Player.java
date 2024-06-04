@@ -91,7 +91,7 @@ public class Player extends Application {
 	}
 	
 	
-	public void start(Stage stage) {
+	public void start(Stage stage) throws Exception { // "throws Exception" wegen UnitTest
 		stage.setTitle("APA Player");
 		BorderPane paneMain = new BorderPane();
 		

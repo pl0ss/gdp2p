@@ -39,28 +39,51 @@ public class ControllablePlayListIterator implements Iterator<AudioFile> {
 	}
 	
 	public List<AudioFile> getFilesIncludeSearch(List<AudioFile> files, String search) {
+		Boolean caseSensitive = false; //* eine eigene Idee für die Suche in VA10
+		
 		if(search == null || search.equals("")) {
 			return files;
 		}
 		
-		
 		List<AudioFile> filteredFiles = new LinkedList<>();
 
+		if(!caseSensitive) {
+			search = search.toLowerCase(); 
+		}
+
 		for(AudioFile a : files) {
-			String autor = a.getAuthor().toLowerCase(); //* toLowerCase: eigene Idee
-			if(autor.contains(search)) {
-				filteredFiles.add(a);
-				continue;
+			String autor = a.getAuthor();
+			if(autor != null) {
+				if(!caseSensitive) {
+					autor = autor.toLowerCase();
+				}
+				
+				if(autor.contains(search)) {
+					filteredFiles.add(a);
+					continue;
+				}
 			}
+
 			
 			String title = a.getTitle().toLowerCase();
-			if(title.contains(search)) {
-				filteredFiles.add(a);
-				continue;
+			if(title != null) {
+				if(!caseSensitive) {
+					title = title.toLowerCase();
+				}
+				
+				if(title.contains(search)) {
+					filteredFiles.add(a);
+					continue;
+				}
 			}
+
 			
-			if(a instanceof TaggedFile) {
-				String album = ((TaggedFile) a).getAlbum().toLowerCase();
+			String album = a.getAlbum();
+			if(album != null) {
+				if(!caseSensitive) {
+					album = album.toLowerCase();
+				}
+				
 				if(album != null && album.contains(search)) {
 					filteredFiles.add(a);
 					continue;

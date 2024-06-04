@@ -57,10 +57,11 @@ public class TaggedFile extends SampledFile {
 	
 	public String toString() {
 		String album = getAlbum();
-		String album_str = (!album.equals("") && album != null) ? album + " - " : "";
+		String album_str = (album != null && !album.equals("")) ? album + " - " : "";
 
+		//* Langform
 		// String album_str;
-		// if(!album.equals("") && album != null) {
+		// if(album != null && !album.equals("")) {
 		// 	album_str = album + " - ";
 		// } else {
 		// 	album_str = "";
