@@ -45,8 +45,8 @@ public class Player extends Application {
 	private final Boolean playtimeProgressBar = true; // Bonus
 	
 	//* Consts
-	public static final String DEFAULT_PLAYLIST = "playList.cert.m3u";
 	private static final String PLAYLIST_DIRECTORY = "playlists/";
+	public static final String DEFAULT_PLAYLIST = "playList.cert.m3u";
 	private static final String INITIAL_PLAY_TIME_LABEL = "00:00";
 	private static final String NO_CURRENT_SONG = " - ";
     private static final ObservableList<String> sortierKriterien = FXCollections.observableArrayList("Standard", "Autor", "Titel", "Album", "Dauer");
@@ -92,11 +92,10 @@ public class Player extends Application {
 	
 	
 	public void start(Stage stage) throws Exception { // "throws Exception" wegen UnitTest
+		playList = askForPlayList(stage); // an dieser Stelle, da ich die stage übergeben muss und die playlist für "playlist_tabelle" gefüllt sein muss
+		
 		stage.setTitle("APA Player");
 		BorderPane paneMain = new BorderPane();
-		
-		playList = askForPlayList(stage); // an dieser Stelle, da ich die stage übergeben muss und die playlist für "playlist_tabelle" gefüllt sein muss
-
 		
 
 		VBox sectionFilterInner = new VBox();
@@ -529,7 +528,7 @@ public class Player extends Application {
 				}
     			
             	try {
-            		Thread.sleep(100);
+            		Thread.sleep(200);
                 } catch (InterruptedException e) {
                 }
 			}
@@ -551,7 +550,7 @@ public class Player extends Application {
     			updatePlayTimeLabel(playList.currentAudioFile());
     			
             	try {
-            		Thread.sleep(100);
+            		Thread.sleep(200);
                 } catch (InterruptedException e) {
                 }
 			}
