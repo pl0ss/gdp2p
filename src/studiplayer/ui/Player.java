@@ -42,11 +42,11 @@ import studiplayer.audio.SortCriterion;
 public class Player extends Application {
 	
 	//* Settings
-	private final Boolean playtimeProgressBar = true; // Bonus
+	private final Boolean playtimeProgressBar = false; // Bonus
 	
 	//* Consts
-	private static final String PLAYLIST_DIRECTORY = "playlists/";
-	public static final String DEFAULT_PLAYLIST = "playList.cert.m3u";
+	public static final String DEFAULT_PLAYLIST = "playlists/playList.cert.m3u";
+	private static final String PLAYLIST_DIRECTORY = "";
 	private static final String INITIAL_PLAY_TIME_LABEL = "00:00";
 	private static final String NO_CURRENT_SONG = " - ";
     private static final ObservableList<String> sortierKriterien = FXCollections.observableArrayList("Standard", "Autor", "Titel", "Album", "Dauer");
@@ -56,6 +56,7 @@ public class Player extends Application {
 	private boolean useCertPlayList = false;
 	private String selectedPlaylist = "-";
 	private boolean songIsPaused = false;
+	private boolean firstTimePlaying = true; // weil sonst beim ersten next der selbe song zwei mal hintereinander kommt
 	
 	//* 
 	private PlayerThread playerThread;
@@ -76,6 +77,7 @@ public class Player extends Application {
 	private ChoiceBox<String> sortChoiceBox;
 	private TextField searchTextField;
 	private Button filterButton;
+	private SongTable playlist_tabelle;
 
 	public Player() {
 		// ToDo: soll hier irgendwas passieren?
@@ -130,7 +132,7 @@ public class Player extends Application {
 				
 		
 		VBox sectionPlaylist = new VBox();
-			SongTable playlist_tabelle = new SongTable(playList);
+			playlist_tabelle = new SongTable(playList);
 			VBox.setVgrow(playlist_tabelle, Priority.ALWAYS); // sodass sich die tabellenhöhe dynamisch anpasst 
 			sectionPlaylist.getChildren().add(playlist_tabelle);
 		
@@ -197,14 +199,13 @@ public class Player extends Application {
 		paneMain.setTop(sectionFilter);
 		paneMain.setCenter(sectionPlaylist);
 		paneMain.setBottom(sectionBottom);
-
 		
 		Scene scene = new Scene(paneMain, 600, 400);
 		stage.setScene(scene);
 		stage.show();
 		
 		// Falls das Abspielen nicht direkt beginnen soll
-		setButtonStates(true, false, false, false);
+		setButtonStates(true, false, false, true);
 		
 		updatePlayListLabel();
 		updateSongInfo(playList.currentAudioFile());
@@ -272,13 +273,12 @@ public class Player extends Application {
 	public PlayList loadPlayList(String pathname) {
 		if(pathname == null || pathname.trim().equals("")) {
 			// DEFAULT_PLAYLIST verwenden
-			pathname = PLAYLIST_DIRECTORY + DEFAULT_PLAYLIST;
+			pathname = DEFAULT_PLAYLIST;
 		}
 
-		playList = new PlayList(pathname);
 		selectedPlaylist = pathname;
 
-		return playList;
+		return new PlayList(pathname);
 	}
 	
 	private Button createButton(String iconfile) { // aus der angabe übernommen
@@ -303,7 +303,6 @@ public class Player extends Application {
 	private void playlistSearchFilter(SongTable playlist_tabelle) {
 		playlistSearch(playlist_tabelle, false);
 		playlistFilter(playlist_tabelle, true);
-		
 	}
 	private void playlistSearch(SongTable playlist_tabelle, boolean refresh) {
 		String search = searchTextField.getText();
@@ -338,6 +337,11 @@ public class Player extends Application {
 		// - passe die Button-Zustände (setDisable(true|false)) an, Abbildung 1 und Abbildung 4 zeigen den Zustand der Buttons wenn ein Lied abgespielt wird bzw. der Player gestoppt ist.
 		// - beginne mit der Wiedergabe
 		
+		if(firstTimePlaying) { // weil sonst beim ersten next der selbe song zwei mal hintereinander kommt
+			firstTimePlaying = false;
+			nextSong();
+		}
+		
 		startThreads(false);
 		
 		if(songIsPaused) {
@@ -355,7 +359,7 @@ public class Player extends Application {
 		playList.currentAudioFile().togglePause();
 		songIsPaused = !songIsPaused;
 
-		setButtonStates(true, false, true, true);
+		setButtonStates(false, true, true, true);
 	}
 
 	private void stopCurrentSong() {
@@ -392,17 +396,20 @@ public class Player extends Application {
 	
 	private void playSelectedSong(TableViewSelectionModel<Song> tableViewSelectionModel) { // wie würde die Lösung ohne "jumpToAudioFileIndex" aussehen
 		int index = tableViewSelectionModel.getSelectedIndex();
-		playList.jumpToAudioFileIndex(index);
 		
-		updateSongInfo(playList.currentAudioFile());
-		
-		// play ausführen, falls player gestoppt ist oder noch nie gestartet wurde
-		if(!playButton.isDisable()) {
-			playCurrentSong();
+		if(index >= 0) { // Falls eine Leere Zeile ausgewählt wird
+			playList.jumpToAudioFileIndex(index);
+			
+			updateSongInfo(playList.currentAudioFile());
+			
+			// play ausführen, falls player gestoppt ist oder noch nie gestartet wurde
+			if(!playButton.isDisable()) {
+				playCurrentSong();
+			}
+			
+			stopPlayerThread();
+			startPlayerThread();	
 		}
-		
-		stopPlayerThread();
-		startPlayerThread();
 	}
 	
 	private void setButtonStates(boolean playButtonState, boolean pauseButtonState, boolean stopButtonState, boolean nextButtonState) {
@@ -436,7 +443,10 @@ public class Player extends Application {
 	}
 	private void updatePlayTimeLabel(AudioFile af) {
 		Platform.runLater(() -> {
-			if (af == null) {
+			if (
+				af == null
+				|| playerThread == null // wenn der stop button gedrückt wurde (also "playerThread" terminiert wurde)
+				) {
 				if(!playtimeProgressBar) {
 					playTimeLabel.setText(INITIAL_PLAY_TIME_LABEL);
 				} else {
@@ -522,7 +532,7 @@ public class Player extends Application {
 //    			System.out.println("PlayerThread");
     			
     			try {
-					playList.currentAudioFile().play();
+					playList.currentAudioFile().play(); // Thread ist danach "blockiert"
 				} catch (NotPlayableException e) {
 					e.printStackTrace();
 				}
