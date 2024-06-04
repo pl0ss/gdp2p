@@ -49,7 +49,7 @@ public class Player extends Application {
 	private static final String PLAYLIST_DIRECTORY = "";
 	private static final String INITIAL_PLAY_TIME_LABEL = "00:00";
 	private static final String NO_CURRENT_SONG = " - ";
-    private static final ObservableList<String> sortierKriterien = FXCollections.observableArrayList("Standard", "Autor", "Titel", "Album", "Dauer");
+    private static final ObservableList<SortCriterion> sortierKriterien = FXCollections.observableArrayList(SortCriterion.values());
 	
     //* Vars
 	private PlayList playList;
@@ -313,17 +313,21 @@ public class Player extends Application {
 		}
 	}
 	private void playlistFilter(SongTable playlist_tabelle, boolean refresh) {
-		String sort_str = (String) sortChoiceBox.getValue();
-		if(sort_str == null || sort_str.equals(sortierKriterien.get(0))) {
+		Object value = sortChoiceBox.getValue();
+		
+		String sort_str = value.toString();
+		
+		boolean filtered = false;
+		
+		for (SortCriterion type : SortCriterion.values()) { // besser als jeden type mit einzener if zu überprüfen, da die Kriterien dann nur noch in "SortCriterion.java" angepasst werden müssen
+			if(sort_str.equals(type.toString())) {
+				playList.setSortCriterion(type);
+				filtered = true;
+			}
+		}
+		
+		if(!filtered) { // falls value nicht for(...) auftaucht, dann nach default filtern (zB falls value null ist, falls das überhaupt passieren kann)
 			playList.setSortCriterion(SortCriterion.DEFAULT);
-		} else if(sort_str.equals(sortierKriterien.get(1))) {
-			playList.setSortCriterion(SortCriterion.AUTHOR);
-		} else if(sort_str.equals(sortierKriterien.get(2))) {
-			playList.setSortCriterion(SortCriterion.TITLE);
-		} else if(sort_str.equals(sortierKriterien.get(3))) {
-			playList.setSortCriterion(SortCriterion.ALBUM);
-		} else if(sort_str.equals(sortierKriterien.get(4))) {
-			playList.setSortCriterion(SortCriterion.DURATION);
 		}
 
 		if(refresh) {
