@@ -42,7 +42,7 @@ import studiplayer.audio.SortCriterion;
 public class Player extends Application {
 	
 	//* Settings
-	private static Boolean playtimeProgressBar = false; // Bonus
+	private static Boolean playtimeProgressBar = true; // Bonus
 	
 	//* Consts
 	public static final String DEFAULT_PLAYLIST = "playlists/DefaultPlayList.m3u";
@@ -168,7 +168,7 @@ public class Player extends Application {
 					playTimeLabelBox.setPadding(new Insets(0, 5, 5, 5));
 					infoGrid.add(playTimeLabelBox, 1, 2);
 						playTimeLabel = new Label();
-						playTimeLabelBox.getChildren().add(playTimeLabel);
+//						playTimeLabelBox.getChildren().add(playTimeLabel); // wird nicht angezeigt, nur für UnitTest
 						playTimeLabel2 = new Label();
 						playTimeLabel2.setPrefWidth(35);
 						playTimeLabel2.setAlignment(Pos.CENTER_RIGHT);
@@ -203,6 +203,10 @@ public class Player extends Application {
 		Scene scene = new Scene(paneMain, 600, 400);
 		stage.setScene(scene);
 		stage.show();
+		
+		// playlist hier erst festlegen, wegen JunitTest
+		playList.loadFromM3U(askForPlayGetPath(stage));
+		playlist_tabelle.refreshSongs();
 		
 		// Falls das Abspielen nicht direkt beginnen soll
 		setButtonStates(true, false, false, true);
@@ -246,10 +250,6 @@ public class Player extends Application {
 		playlist_tabelle.setRowSelectionHandler(e -> {
 			playSelectedSong(playlist_tabelle.getSelectionModel());
 		});
-		
-		// playlist hier erst festlegen, wegen JunitTest
-		playList.loadFromM3U(askForPlayGetPath(stage));
-		playlist_tabelle.refreshSongs();
 	}
 
 
@@ -273,6 +273,7 @@ public class Player extends Application {
 	}
 
 	public String askForPlayGetPath(Stage stage) {
+		String path = "";
 
 		if(!useCertPlayList) { // Playlist PopUp
 			FileChooser fileChooser = new FileChooser();
@@ -281,14 +282,17 @@ public class Player extends Application {
 	        if (selectedFile != null) {
 	            String filePath = selectedFile.getAbsolutePath();
 	            // System.out.println("Selected file path: " + filePath);
-	            return filePath;
+	            path = filePath;
 	        } else {
 	            // System.out.println("File selection cancelled.");
-	        	return DEFAULT_PLAYLIST;
+	        	path = DEFAULT_PLAYLIST;
 	        }
 		} else { // Unit Test
-			return DEFAULT_PLAYLIST;
+			path = DEFAULT_PLAYLIST;
 		}
+
+		selectedPlaylistPath = path;
+		return path;
 	}
 	
 	public PlayList loadPlayList() {
@@ -485,7 +489,7 @@ public class Player extends Application {
 				if(!playtimeProgressBar) {
 					playTimeLabel.setText(INITIAL_PLAY_TIME_LABEL);
 				} else {
-					playTimeLabel.setText(INITIAL_PLAY_TIME_LABEL);
+					playTimeLabel.setText(INITIAL_PLAY_TIME_LABEL); // wird nicht angezeigt, nur für UnitTest
 					playTimeLabel2.setText("");
 					playTimeLabel3.setText("");
 					playTimeLabel4.setText("");
@@ -499,11 +503,14 @@ public class Player extends Application {
 					String text = formatPosition + " - " + formatDuration; //* leicht abgewandelt
 					playTimeLabel.setText(text);	
 				} else {
+					String text = formatPosition + " - " + formatDuration;
+					playTimeLabel.setText(text);	
+					
 					long position = playList.currentAudioFile().getPosition();
 					long duration = playList.currentAudioFile().getDuration();
 					int progress = (int) ( ( (double) position / (double) duration) * 100 ); // in Prozent
 					
-					playTimeLabel.setText("");
+					// playTimeLabel.setText("");
 					playTimeLabel2.setText(formatPosition);
 					playTimeLabel3.setText(getProgressBar(progress));
 					playTimeLabel4.setText(formatDuration);
@@ -539,14 +546,14 @@ public class Player extends Application {
 		return str;
 	}
 	
-	public static void main(String[] args) {
-		for(String str : args) { //* Bonus
-			// System.out.println(str);
-			
-			if(str.toLowerCase().equals("showProgressBar".toLowerCase())) {
-				playtimeProgressBar = true;
-			}
-		}
+	public static void main(String[] args) { // args in Run Configurations > Arguemnts > Program arguments
+//		for(String str : args) { //* Bonus
+//			// System.out.println(str);
+//			
+//			if(str.toLowerCase().equals("showProgressBar".toLowerCase())) {
+//				playtimeProgressBar = true;
+//			}
+//		}
 		
 		launch();
 	}
