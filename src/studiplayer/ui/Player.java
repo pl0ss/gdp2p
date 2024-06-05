@@ -42,19 +42,19 @@ import studiplayer.audio.SortCriterion;
 public class Player extends Application {
 	
 	//* Settings
-	private final Boolean playtimeProgressBar = false; // Bonus
+	private static Boolean playtimeProgressBar = false; // Bonus
 	
 	//* Consts
-	public static final String DEFAULT_PLAYLIST = "playlists/playList.cert.m3u";
+	public static final String DEFAULT_PLAYLIST = "playlists/DefaultPlayList.m3u";
 	private static final String PLAYLIST_DIRECTORY = "";
 	private static final String INITIAL_PLAY_TIME_LABEL = "00:00";
 	private static final String NO_CURRENT_SONG = " - ";
     private static final ObservableList<SortCriterion> sortierKriterien = FXCollections.observableArrayList(SortCriterion.values());
 	
     //* Vars
-	private PlayList playList;
+	private PlayList playList = new PlayList();
 	private boolean useCertPlayList = false;
-	private String selectedPlaylist = "-";
+	private String selectedPlaylistPath = "-";
 	private boolean songIsPaused = false;
 	private boolean firstTimePlaying = true; // weil sonst beim ersten next der selbe song zwei mal hintereinander kommt
 	
@@ -94,7 +94,7 @@ public class Player extends Application {
 	
 	
 	public void start(Stage stage) throws Exception { // "throws Exception" wegen UnitTest
-		playList = askForPlayList(stage); // an dieser Stelle, da ich die stage übergeben muss und die playlist für "playlist_tabelle" gefüllt sein muss
+//		playList = askForPlayList(stage); // an dieser Stelle, da ich die stage übergeben muss und die playlist für "playlist_tabelle" gefüllt sein muss
 		
 		stage.setTitle("APA Player");
 		BorderPane paneMain = new BorderPane();
@@ -246,9 +246,13 @@ public class Player extends Application {
 		playlist_tabelle.setRowSelectionHandler(e -> {
 			playSelectedSong(playlist_tabelle.getSelectionModel());
 		});
+		
+		// playlist hier erst festlegen, wegen JunitTest
+		playList.loadFromM3U(askForPlayGetPath(stage));
+		playlist_tabelle.refreshSongs();
 	}
-	
-	
+
+
 	public PlayList askForPlayList(Stage stage) {
 		if(!useCertPlayList) { // Playlist PopUp
 			FileChooser fileChooser = new FileChooser();
@@ -263,7 +267,27 @@ public class Player extends Application {
 	        	return loadPlayList();
 	        }
 		} else { // Unit Test
-			return loadPlayList();
+//			return loadPlayList();
+			return new PlayList();
+		}
+	}
+
+	public String askForPlayGetPath(Stage stage) {
+
+		if(!useCertPlayList) { // Playlist PopUp
+			FileChooser fileChooser = new FileChooser();
+			fileChooser.setTitle("Open Resource File");
+			File selectedFile = fileChooser.showOpenDialog(stage);
+	        if (selectedFile != null) {
+	            String filePath = selectedFile.getAbsolutePath();
+	            // System.out.println("Selected file path: " + filePath);
+	            return filePath;
+	        } else {
+	            // System.out.println("File selection cancelled.");
+	        	return DEFAULT_PLAYLIST;
+	        }
+		} else { // Unit Test
+			return DEFAULT_PLAYLIST;
 		}
 	}
 	
@@ -276,7 +300,10 @@ public class Player extends Application {
 			pathname = DEFAULT_PLAYLIST;
 		}
 
-		selectedPlaylist = pathname;
+		selectedPlaylistPath = pathname;
+		
+		playList.loadFromM3U(pathname);
+		playlist_tabelle.refreshSongs();
 
 		return new PlayList(pathname);
 	}
@@ -360,10 +387,14 @@ public class Player extends Application {
 		// - falls Song abgespielt wird: pausiere die Wiedergabe
 		// - falls Song pausiert ist: setze die Wiedergabe fort
 		
-		playList.currentAudioFile().togglePause();
+		AudioFile current = playList.currentAudioFile();
+		if(current != null) {
+			current.togglePause();
+		}
+
 		songIsPaused = !songIsPaused;
 
-		setButtonStates(false, true, true, true);
+		setButtonStates(false, true, true, true); // muss laut UnitTest so sein
 	}
 
 	private void stopCurrentSong() {
@@ -428,7 +459,7 @@ public class Player extends Application {
 		updatePlayTimeLabel(af);
 	}
 	private void updateCurrentSongLabel(AudioFile af) {
-		Platform.runLater(() -> {
+		Platform.runLater(() -> { // weil der Thread sonst nicht auf die JavaFX Elemente zugreifen kann
 			if (af == null) {
 				currentSongLabel.setText(NO_CURRENT_SONG);
 			} else {
@@ -446,7 +477,7 @@ public class Player extends Application {
 		});
 	}
 	private void updatePlayTimeLabel(AudioFile af) {
-		Platform.runLater(() -> {
+		Platform.runLater(() -> { // weil der Thread sonst nicht auf die JavaFX Elemente zugreifen kann
 			if (
 				af == null
 				|| playerThread == null // wenn der stop button gedrückt wurde (also "playerThread" terminiert wurde)
@@ -481,7 +512,7 @@ public class Player extends Application {
 		});	
 	}
 	private void updatePlayListLabel() {
-		playListLabel.setText(selectedPlaylist);
+		playListLabel.setText(selectedPlaylistPath);
 	}
 	
 	public String getProgressBar(int progress) {
@@ -509,6 +540,14 @@ public class Player extends Application {
 	}
 	
 	public static void main(String[] args) {
+		for(String str : args) { //* Bonus
+			// System.out.println(str);
+			
+			if(str.toLowerCase().equals("showProgressBar".toLowerCase())) {
+				playtimeProgressBar = true;
+			}
+		}
+		
 		launch();
 	}
 	
@@ -528,7 +567,12 @@ public class Player extends Application {
 		public void terminate() {
 			stopped = true;
 			playerThread = null;
-			playList.currentAudioFile().stop();
+
+			AudioFile current = playList.currentAudioFile();
+			if(current != null) {
+				current.stop();
+			}
+			
 		}
 		
 		public void run() {
@@ -536,7 +580,11 @@ public class Player extends Application {
 //    			System.out.println("PlayerThread");
     			
     			try {
-					playList.currentAudioFile().play(); // Thread ist danach "blockiert"
+					AudioFile current = playList.currentAudioFile();
+					if(current != null) {
+						current.play(); // Thread ist danach "blockiert"
+					}
+					
 				} catch (NotPlayableException e) {
 					e.printStackTrace();
 				}

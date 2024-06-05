@@ -271,7 +271,7 @@ public class PlayListTest {
         assertEquals(
                 "Load PlayList from M3U file yields wrong result",
                 "[Eisbach - Rock 812 - The Sea, the Sky - 05:31]",
-                pl.toString());
+                pl.getList().toString());
         
         // Cleanup
         m3u.delete();

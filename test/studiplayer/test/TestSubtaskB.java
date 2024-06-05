@@ -24,11 +24,12 @@ public class TestSubtaskB {
     }
     
     @Test
-    public void testDefaultPlaylistConstant() throws NoSuchFieldException, SecurityException, NoSuchMethodException {
+    public void testDefaultPlaylistConstant() throws NoSuchFieldException, SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException {
         assertTrue("Class Player must have a constant named DEFAULT_PLAYLIST", Player.class.getDeclaredField("DEFAULT_PLAYLIST") != null);
         assertTrue("DEFAULT_PLAYLIST should be public", Modifier.isPublic(Player.class.getDeclaredField("DEFAULT_PLAYLIST").getModifiers()));
         assertTrue("DEFAULT_PLAYLIST should be static", Modifier.isStatic(Player.class.getDeclaredField("DEFAULT_PLAYLIST").getModifiers()));
         assertEquals("DEFAULT_PLAYLIST should be a String", String.class, Player.class.getDeclaredField("DEFAULT_PLAYLIST").getType());
+        assertEquals("DEFAULT_PLAYLIST should contain playlists/DefaultPlayList.m3u", "playlists/DefaultPlayList.m3u", Player.class.getDeclaredField("DEFAULT_PLAYLIST").get(null));
     }
     
     @Test
